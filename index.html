@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Calculadora Mancho</title>
-    <!-- Cargamos Chart.js para las gráficas -->
+    <!-- Cargamos Chart.js con prioridad -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
     <style>
@@ -85,7 +85,7 @@
         .emoji-click {
             font-size: 50px;
             cursor: pointer;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.3s ease;
             z-index: 5;
         }
 
@@ -130,15 +130,18 @@
             box-shadow: 10px 10px 0px #000;
         }
 
-        .input-grid { margin: 15px 0; color: white; }
+        .input-grid { margin: 15px 0; color: white; line-height: 2.2; }
+        
         input {
             font-family: 'Luckiest Guy';
             border: 3px solid #000;
             border-radius: 8px;
             padding: 5px;
-            width: 65px;
+            width: 60px;
             text-align: center;
             margin: 2px;
+            background: #fff;
+            color: #000;
         }
 
         .res-box {
@@ -149,6 +152,7 @@
             margin: 15px 0;
             color: #000;
             font-size: 1rem;
+            min-height: 40px;
         }
 
         .chart-container {
@@ -158,7 +162,7 @@
             border: 4px solid #000;
             border-radius: 15px;
             margin-top: 10px;
-            display: none;
+            padding: 5px;
         }
     </style>
 </head>
@@ -200,7 +204,7 @@
         
         <div id="result-display" class="res-box" style="display:none;"></div>
         
-        <div id="graph-wrapper" class="chart-container">
+        <div id="graph-wrapper" class="chart-container" style="display:none;">
             <canvas id="myChart"></canvas>
         </div>
 
@@ -215,8 +219,8 @@
         'lin-p': "Calcula la recta con punto y pendiente: y - y1 = m(x - x1).",
         'lin-g': "Ecuación general: Ax + By + C = 0.",
         'cuad': "Ecuación de 2do grado: ax² + bx + c = 0.",
-        'sis2': "Sistema 2x2: Intersección de dos líneas.",
-        'sis3': "Sistema 3x3: Resuelto por Método de Cramer."
+        'sis2': "Sistema 2x2: Encuentra donde se cruzan dos líneas.",
+        'sis3': "Sistema 3x3: Resuelto por Método de Cramer (Determinantes)."
     };
 
     function showSub() {
@@ -228,7 +232,7 @@
         document.getElementById('home').style.display = 'block';
         document.getElementById('sub-menu').style.display = 'none';
         document.getElementById('calc-screen').style.display = 'none';
-        if(chartInstance) chartInstance.destroy();
+        if(chartInstance) { chartInstance.destroy(); chartInstance = null; }
     }
 
     function toggleInfo() {
@@ -266,31 +270,50 @@
         const resDiv = document.getElementById('result-display');
         const graphDiv = document.getElementById('graph-wrapper');
         resDiv.style.display = 'block';
-        const val = (id) => parseFloat(document.getElementById(id).value || 0);
+        
+        const val = (id) => {
+            const v = parseFloat(document.getElementById(id).value);
+            return isNaN(v) ? 0 : v;
+        };
 
         let labels = Array.from({length: 21}, (_, i) => i - 10);
         let dataPoints = [];
+        let showGraph = false;
 
         if(currentMode === 'lin-p') {
             const m = val('n1'), x1 = val('n2'), y1 = val('n3');
             const b = y1 - (m * x1);
             resDiv.innerHTML = `Ecuación: y = ${m}x + (${b.toFixed(2)})`;
             dataPoints = labels.map(x => m*x + b);
-            graphDiv.style.display = 'block';
+            showGraph = true;
+        } else if(currentMode === 'lin-g') {
+            const A = val('n1'), B = val('n2'), C = val('n3');
+            if(B === 0) resDiv.innerHTML = `Línea Vertical: x = ${(-C/A).toFixed(2)}`;
+            else {
+                const m = -A/B; const b = -C/B;
+                resDiv.innerHTML = `y = ${m.toFixed(2)}x + (${b.toFixed(2)})`;
+                dataPoints = labels.map(x => m*x + b);
+                showGraph = true;
+            }
         } else if(currentMode === 'cuad') {
             const a = val('n1'), b = val('n2'), c = val('n3');
             const disc = b*b - 4*a*c;
-            if(disc < 0) resDiv.innerHTML = "Raíces Imaginarias";
+            if(a === 0) resDiv.innerHTML = "No es cuadrática (a=0)";
+            else if(disc < 0) resDiv.innerHTML = "Raíces Imaginarias";
             else resDiv.innerHTML = `x1: ${((-b+Math.sqrt(disc))/(2*a)).toFixed(2)} | x2: ${((-b-Math.sqrt(disc))/(2*a)).toFixed(2)}`;
             dataPoints = labels.map(x => a*x*x + b*x + c);
-            graphDiv.style.display = 'block';
+            showGraph = true;
+        } else if(currentMode === 'sis2') {
+            const a=val('n1'), b=val('n2'), c=val('n3'), d=val('n4'), e=val('n5'), f=val('n6');
+            const det = a*e - b*d;
+            if(det === 0) resDiv.innerHTML = "Sin solución única";
+            else resDiv.innerHTML = `X: ${((c*e-b*f)/det).toFixed(2)} | Y: ${((a*f-c*d)/det).toFixed(2)}`;
         } else if(currentMode === 'sis3') {
-            // Lógica de Cramer para 3x3
             const a1=val('n1'), b1=val('n2'), c1=val('n3'), d1=val('n4');
             const a2=val('n5'), b2=val('n6'), c2=val('n7'), d2=val('n8');
             const a3=val('n9'), b3=val('n10'), c3=val('n11'), d3=val('n12');
             const det = a1*(b2*c3-b3*c2) - b1*(a2*c3-a3*c2) + c1*(a2*b3-a3*b2);
-            if(det === 0) resDiv.innerText = "Sin solución única.";
+            if(det === 0) resDiv.innerHTML = "Determinante 0";
             else {
                 const dx = d1*(b2*c3-b3*c2)-b1*(d2*c3-d3*c2)+c1*(d2*b3-d3*b2);
                 const dy = a1*(d2*c3-d3*c2)-d1*(a2*c3-a3*c2)+c1*(a2*d3-a3*d2);
@@ -299,13 +322,31 @@
             }
         }
 
-        if(graphDiv.style.display === 'block') {
+        if(showGraph) {
+            graphDiv.style.display = 'block';
             if(chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(document.getElementById('myChart'), {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
                 type: 'line',
-                data: { labels, datasets: [{label: 'Función', data: dataPoints, borderColor: '#ffcc00', tension: 0.1}] },
-                options: { responsive: true, maintainAspectRatio: false }
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Gráfica f(x)',
+                        data: dataPoints,
+                        borderColor: '#ffcc00',
+                        borderWidth: 3,
+                        fill: false,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: false } }
+                }
             });
+        } else {
+            graphDiv.style.display = 'none';
         }
     }
 </script>

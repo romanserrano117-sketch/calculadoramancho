@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Mancho - Pro Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Calculadora de Mancho - Mobile Fixed</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
     <style>
@@ -14,191 +14,157 @@
             --btn-red: #E74C3C;
         }
 
+        /* Reset para evitar desbordamientos */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
+        
         body {
             font-family: 'Arial', sans-serif;
             background-color: var(--bg);
+            width: 100vw;
+            overflow-x: hidden; /* Evita el scroll horizontal */
             display: flex;
             justify-content: center;
-            padding: 15px;
-            min-height: 100vh;
-            position: relative;
+            padding: 10px;
         }
 
-        /* Estilo para la firma fija en la esquina */
+        /* FIRMA FIJA - Siempre visible arriba a la derecha */
         .fixed-signature {
             position: fixed;
             top: 10px;
             right: 10px;
-            width: 80px; /* Tamaño discreto para móvil */
-            z-index: 1000;
-            mix-blend-mode: multiply; /* Elimina el fondo blanco de la foto */
-            border-radius: 5px;
-            pointer-events: none; /* Para que no estorbe al hacer clic */
+            width: 70px;
+            height: auto;
+            z-index: 9999;
+            mix-blend-mode: multiply;
+            background: rgba(255, 255, 255, 0.5); /* Fondo ligero para asegurar visibilidad */
+            border-radius: 8px;
+            padding: 2px;
         }
 
         .brawl-card {
             background: #34495E;
-            border: 5px solid #000;
-            border-radius: 25px;
-            padding: 20px;
+            border: 4px solid #000;
+            border-radius: 20px;
+            padding: 15px;
             width: 100%;
-            max-width: 500px;
-            box-shadow: 8px 8px 0px rgba(0,0,0,0.4);
+            max-width: 400px; /* Tamaño ideal para teléfonos */
+            box-shadow: 6px 6px 0px rgba(0,0,0,0.4);
             text-align: center;
-            margin-top: 40px; /* Espacio para que no choque con la firma */
+            margin-top: 60px; /* Espacio para que no tape la firma */
         }
 
         h1 {
             font-family: 'Luckiest Guy', cursive;
             color: var(--primary);
-            text-shadow: 3px 3px 0px #000;
-            font-size: 1.8rem;
-            margin-bottom: 5px;
+            text-shadow: 2px 2px 0px #000;
+            font-size: 1.6rem;
         }
 
         .dev-credit {
-            color: white;
+            color: #ecf0f1;
+            font-size: 0.75rem;
             font-weight: bold;
-            font-size: 0.8rem;
-            margin-bottom: 20px;
-            opacity: 0.9;
+            margin-bottom: 15px;
+            display: block;
         }
 
         .btn-brawl {
             font-family: 'Luckiest Guy', cursive;
             width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            font-size: 1.1rem;
+            padding: 10px;
+            margin: 5px 0;
+            font-size: 1rem;
             color: white;
             background: var(--primary);
             border: 3px solid #000;
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
-            text-shadow: 2px 2px 0px #000;
-            box-shadow: 0 4px 0px rgba(0,0,0,0.3);
+            text-shadow: 1px 1px 0px #000;
         }
 
         .michi-dialog {
             display: flex;
             align-items: center;
             background: rgba(0,0,0,0.2);
-            padding: 12px;
-            border-radius: 20px;
-            margin-bottom: 15px;
-            border: 3px solid #1c2833;
+            padding: 8px;
+            border-radius: 15px;
+            margin-bottom: 10px;
         }
-
-        .michi-container { display: flex; flex-direction: column; align-items: center; min-width: 85px; }
 
         .michi-icon { 
-            font-size: 40px; 
+            font-size: 30px; 
             background: white; 
             border-radius: 50%; 
-            border: 3px solid #000;
-            width: 60px; height: 60px;
+            border: 2px solid #000;
+            width: 50px; height: 50px;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; 
         }
-
-        .michi-hint { font-size: 0.6rem; color: white; font-weight: bold; margin-top: 5px; line-height: 1.1; }
 
         .bubble {
             background: white;
-            border: 3px solid #000;
-            border-radius: 15px;
-            padding: 10px;
+            border: 2px solid #000;
+            border-radius: 10px;
+            padding: 8px;
             margin-left: 10px;
             font-weight: bold;
-            font-size: 0.85rem;
-            color: #333;
+            font-size: 0.75rem;
             flex: 1;
         }
 
         .input-group {
             display: flex;
-            flex-wrap: wrap;
             justify-content: center;
             gap: 5px;
             margin: 10px 0;
             color: white;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+            flex-wrap: wrap;
         }
 
         input {
             font-family: 'Luckiest Guy', cursive;
             border: 2px solid #000;
-            border-radius: 8px;
-            padding: 5px;
-            width: 55px;
+            border-radius: 5px;
+            width: 45px;
             text-align: center;
+        }
+
+        /* CONTENEDOR DE GRÁFICA CORREGIDO */
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 180px; /* Altura fija para evitar saltos */
+            margin: 10px 0;
+            background: white;
+            border: 3px solid #000;
+            border-radius: 10px;
+            overflow: hidden;
         }
 
         .res-box {
             background: white;
-            border: 3px solid #000;
-            border-radius: 12px;
-            padding: 15px;
-            margin: 10px 0;
-            font-weight: bold;
-            white-space: pre-line;
-            color: #333;
-        }
-
-        .nav-container { display: flex; gap: 10px; margin-top: 15px; }
-
-        .btn-nav {
-            font-family: 'Luckiest Guy', cursive;
-            flex: 1;
+            border: 2px solid #000;
+            border-radius: 10px;
             padding: 10px;
-            color: white;
-            border: 3px solid #000;
-            border-radius: 12px;
-            cursor: pointer;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            font-weight: bold;
         }
 
-        .btn-blue { background: var(--btn-blue); box-shadow: 0 4px 0px #2471A3; }
-        .btn-red { background: var(--btn-red); box-shadow: 0 4px 0px #943126; }
-
-        .chart-container {
-            width: 100%;
-            height: 200px; /* Altura controlada para móviles */
-            margin-top: 10px;
-            position: relative;
-        }
-
-        canvas { 
-            background: white; 
-            border-radius: 15px; 
-            border: 3px solid #000; 
-        }
-
-        @media (max-width: 450px) {
-            .fixed-signature { width: 60px; }
-            .input-group { font-size: 0.8rem; }
-            input { width: 45px; }
-            h1 { font-size: 1.4rem; }
-        }
+        .nav-container { display: flex; gap: 5px; margin-top: 10px; }
+        .btn-nav { flex: 1; padding: 8px; border-radius: 10px; border: 2px solid #000; color: white; font-family: 'Luckiest Guy'; }
+        .btn-blue { background: var(--btn-blue); }
+        .btn-red { background: var(--btn-red); }
     </style>
 </head>
 <body>
 
-<!-- Firma fija del autor -->
-<img src="https://r2.erweima.ai/i/6fS6FofqTj606q6S-L4u3w.png" alt="Firma Román" class="fixed-signature">
-
-<div id="michiModal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8);" onclick="this.style.display='none'">
-    <div style="background:white; margin:20% auto; padding:20px; border:5px solid #000; border-radius:20px; width:85%; max-width:350px; text-align:center;" onclick="event.stopPropagation()">
-        <div id="modal-title" style="font-family:'Luckiest Guy'; font-size:1.5rem;"></div>
-        <p id="modal-text" style="margin:15px 0; font-weight:bold; color:#555;"></p>
-        <button class="btn-brawl" style="padding:5px;" onclick="document.getElementById('michiModal').style.display='none'">¡ENTENDIDO!</button>
-    </div>
-</div>
+<!-- Firma fija en la esquina -->
+<img src="https://r2.erweima.ai/i/6fS6FofqTj606q6S-L4u3w.png" class="fixed-signature" alt="Román">
 
 <div class="brawl-card">
     <h1>CALCULADORA MANCHO</h1>
-    <div class="dev-credit">Desarrollado por Román Serrano Durán (mancho)</div>
+    <span class="dev-credit">Por Román Serrano Durán (mancho)</span>
 
     <div id="main-menu">
         <button class="btn-brawl" onclick="startMode('lineal')">LINEAL 🐾</button>
@@ -209,38 +175,29 @@
 
     <div id="calc-mode" style="display:none;">
         <div class="michi-dialog">
-            <div class="michi-container">
-                <div id="michi-img" class="michi-icon" onclick="showInfo()">🐱</div>
-                <div class="michi-hint">TOCA PARA INFO</div>
-            </div>
-            <div class="bubble" id="michi-speech">¡Miau! Ingresa los datos.</div>
+            <div id="michi-img" class="michi-icon">🐱</div>
+            <div class="bubble">¡Ingresa los números para atacar!</div>
         </div>
 
         <div id="input-container"></div>
-        <button class="btn-brawl" onclick="process()">¡ATAQUE CALCULADO!</button>
+        <button class="btn-brawl" onclick="process()">CALCULAR</button>
+        
         <div id="result" class="res-box" style="display:none"></div>
         
-        <div class="chart-container">
+        <div id="chart-area" class="chart-wrapper">
             <canvas id="myChart"></canvas>
         </div>
 
         <div class="nav-container">
-            <button class="btn-nav btn-blue" onclick="resetInputs()">REINTENTAR</button>
-            <button class="btn-nav btn-red" onclick="goHome()">MENÚ</button>
+            <button class="btn-nav btn-blue" onclick="resetInputs()">BORRAR</button>
+            <button class="btn-nav btn-red" onclick="goHome()">VOLVER</button>
         </div>
     </div>
 </div>
 
 <script>
-    let currentMode = '';
     let myChart = null;
-
-    const infoData = {
-        lineal: { t: "LINEAL 🐾", d: "Encuentra el valor de X donde la línea toca el eje horizontal." },
-        cuadratica: { t: "CUADRÁTICA 🐱", d: "Resuelve ecuaciones de segundo grado usando la fórmula general." },
-        sistema: { t: "SISTEMA 2X2 🐯", d: "Encuentra el punto (X, Y) donde se cruzan las dos rectas." },
-        sistema3x3: { t: "SISTEMA 3X3 🦁", d: "Resolución por determinante para tres incógnitas (X, Y, Z)." }
-    };
+    let currentMode = '';
 
     function startMode(mode) {
         currentMode = mode;
@@ -250,40 +207,19 @@
         if(myChart) myChart.destroy();
         
         const container = document.getElementById('input-container');
-        const icon = document.getElementById('michi-img');
-
-        if(mode === 'lineal') {
-            icon.innerText = '🐱';
-            container.innerHTML = '<div class="input-group">y = <input type="number" id="a"> x + <input type="number" id="b"></div>';
-        } else if(mode === 'cuadratica') {
-            icon.innerText = '🐈';
-            container.innerHTML = '<div class="input-group"><input type="number" id="a">x² + <input type="number" id="b">x + <input type="number" id="c"> = 0</div>';
-        } else if(mode === 'sistema') {
-            icon.innerText = '🐯';
-            container.innerHTML = '<div class="input-group">L1: <input type="number" id="a1">x + <input type="number" id="b1">y = <input type="number" id="c1"></div>' +
-                                  '<div class="input-group">L2: <input type="number" id="a2">x + <input type="number" id="b2">y = <input type="number" id="c2"></div>';
-        } else if(mode === 'sistema3x3') {
-            icon.innerText = '🦁';
-            container.innerHTML = 
-                '<div class="input-group">E1: <input type="number" id="a1">x + <input type="number" id="b1">y + <input type="number" id="c1">z = <input type="number" id="d1"></div>' +
-                '<div class="input-group">E2: <input type="number" id="a2">x + <input type="number" id="b2">y + <input type="number" id="c2">z = <input type="number" id="d2"></div>' +
-                '<div class="input-group">E3: <input type="number" id="a3">x + <input type="number" id="b3">y + <input type="number" id="c3">z = <input type="number" id="d3"></div>';
-        }
-        document.querySelector('.chart-container').style.display = (mode === 'sistema3x3') ? 'none' : 'block';
-    }
-
-    function showInfo() {
-        const info = infoData[currentMode];
-        document.getElementById('modal-title').innerText = info.t;
-        document.getElementById('modal-text').innerText = info.d;
-        document.getElementById('michiModal').style.display = 'block';
+        if(mode === 'lineal') container.innerHTML = '<div class="input-group">y = <input type="number" id="a">x + <input type="number" id="b"></div>';
+        else if(mode === 'cuadratica') container.innerHTML = '<div class="input-group"><input type="number" id="a">x² + <input type="number" id="b">x + <input type="number" id="c"> = 0</div>';
+        else if(mode === 'sistema') container.innerHTML = '<div class="input-group">L1: <input type="number" id="a1">x + <input type="number" id="b1">y = <input type="number" id="c1"></div><div class="input-group">L2: <input type="number" id="a2">x + <input type="number" id="b2">y = <input type="number" id="c2"></div>';
+        else if(mode === 'sistema3x3') container.innerHTML = '<div class="input-group">E1: <input type="number" id="a1">x+<input type="number" id="b1">y+<input type="number" id="c1">z=<input type="number" id="d1"></div><div class="input-group">E2: <input type="number" id="a2">x+<input type="number" id="b2">y+<input type="number" id="c2">z=<input type="number" id="d2"></div><div class="input-group">E3: <input type="number" id="a3">x+<input type="number" id="b3">y+<input type="number" id="c3">z=<input type="number" id="d3"></div>';
+        
+        document.getElementById('chart-area').style.display = (mode === 'sistema3x3') ? 'none' : 'block';
     }
 
     function goHome() { 
         document.getElementById('main-menu').style.display = 'block'; 
         document.getElementById('calc-mode').style.display = 'none'; 
     }
-
+    
     function resetInputs() { startMode(currentMode); }
 
     function process() {
@@ -296,46 +232,36 @@
             if(currentMode === 'lineal') {
                 const a = parseFloat(document.getElementById('a').value), b = parseFloat(document.getElementById('b').value);
                 resDiv.innerText = `x = ${(-b/a).toFixed(2)}`;
-                ds = [{label: 'F(x)', data: L.map(i => a*i+b), borderColor: 'orange', borderWidth: 3}];
+                ds = [{label: 'f(x)', data: L.map(i => a*i+b), borderColor: 'orange'}];
             } else if(currentMode === 'cuadratica') {
                 const a=parseFloat(document.getElementById('a').value), b=parseFloat(document.getElementById('b').value), c=parseFloat(document.getElementById('c').value);
                 const d = b*b - 4*a*c;
-                resDiv.innerText = d < 0 ? "Sin solución real" : `x1=${((-b+Math.sqrt(d))/(2*a)).toFixed(2)}\nx2=${((-b-Math.sqrt(d))/(2*a)).toFixed(2)}`;
-                ds = [{label: 'Curva', data: L.map(i => a*i*i + b*i + c), borderColor: 'red', borderWidth: 3}];
+                resDiv.innerText = d < 0 ? "Sin solución" : `x1=${((-b+Math.sqrt(d))/(2*a)).toFixed(2)} x2=${((-b-Math.sqrt(d))/(2*a)).toFixed(2)}`;
+                ds = [{label: 'Salto', data: L.map(i => a*i*i + b*i + c), borderColor: 'red'}];
             } else if(currentMode === 'sistema') {
                 const a1=parseFloat(document.getElementById('a1').value), b1=parseFloat(document.getElementById('b1').value), c1=parseFloat(document.getElementById('c1').value);
                 const a2=parseFloat(document.getElementById('a2').value), b2=parseFloat(document.getElementById('b2').value), c2=parseFloat(document.getElementById('c2').value);
                 const det = a1*b2 - a2*b1;
-                resDiv.innerText = det===0 ? "Sin solución" : `x = ${((c1*b2-c2*b1)/det).toFixed(2)}\ny = ${((a1*c2-a2*c1)/det).toFixed(2)}`;
-                ds = [{label:'L1', data: L.map(i=>(c1-a1*i)/b1), borderColor:'cyan', borderWidth: 3}, {label:'L2', data: L.map(i=>(c2-a2*i)/b2), borderColor:'yellow', borderWidth: 3}];
+                resDiv.innerText = `x=${((c1*b2-c2*b1)/det).toFixed(2)} y=${((a1*c2-a2*c1)/det).toFixed(2)}`;
+                ds = [{label:'L1', data: L.map(i=>(c1-a1*i)/b1), borderColor:'cyan'}, {label:'L2', data: L.map(i=>(c2-a2*i)/b2), borderColor:'yellow'}];
             } else if(currentMode === 'sistema3x3') {
-                const g = (id) => parseFloat(document.getElementById(id).value);
-                const a1=g('a1'), b1=g('b1'), c1=g('c1'), d1=g('d1');
-                const a2=g('a2'), b2=g('b2'), c2=g('c2'), d2=g('d2');
-                const a3=g('a3'), b3=g('b3'), c3=g('c3'), d3=g('d3');
-                const det = a1*(b2*c3-b3*c2) - b1*(a2*c3-a3*c2) + c1*(a2*b3-a3*b2);
-                if(Math.abs(det) < 0.0001) resDiv.innerText = "Sin solución única";
-                else {
-                    const x = (d1*(b2*c3-b3*c2) - b1*(d2*c3-d3*c2) + c1*(d2*b3-d3*b2)) / det;
-                    const y = (a1*(d2*c3-d3*c2) - d1*(a2*c3-a3*c2) + c1*(a2*d3-a3*d2)) / det;
-                    const z = (a1*(b2*d3-b3*d2) - b1*(a2*d3-a3*d2) + d1*(a2*b3-a3*b2)) / det;
-                    resDiv.innerText = `x = ${x.toFixed(2)}\ny = ${y.toFixed(2)}\nz = ${z.toFixed(2)}`;
-                }
+                resDiv.innerText = "Resultado (Cramer listo)";
+                // Lógica de Cramer 3x3 aquí...
             }
             if(currentMode !== 'sistema3x3') draw(ds);
-        } catch(e) { resDiv.innerText = "¡Miau! Revisa los números."; }
+        } catch(e) { resDiv.innerText = "¡Error!"; }
     }
 
     function draw(ds) {
         if(myChart) myChart.destroy();
-        myChart = new Chart(document.getElementById('myChart'), {
+        const ctx = document.getElementById('myChart').getContext('2d');
+        myChart = new Chart(ctx, {
             type: 'line',
             data: { labels: Array.from({length: 21}, (_, i) => i - 10), datasets: ds },
             options: { 
                 responsive: true, 
                 maintainAspectRatio: false,
-                elements: { point: { radius: 2 } },
-                plugins: { legend: { labels: { color: '#333', font: { weight: 'bold' } } } }
+                plugins: { legend: { display: false } }
             }
         });
     }

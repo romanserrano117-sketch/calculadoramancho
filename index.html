@@ -67,46 +67,68 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
         }
 
         .btn-brawl:active { transform: translateY(3px); box-shadow: 0 2px 0px rgba(0,0,0,0.2); }
 
-        .michi-box {
+        /* CONTENEDOR DEL MICHI Y EL GLOBO */
+        .michi-section {
+            position: relative;
             display: flex;
+            justify-content: center;
             align-items: center;
-            background: rgba(0,0,0,0.3);
-            padding: 10px;
-            border-radius: 20px;
-            margin-bottom: 15px;
-            border: 3px solid #000;
-            cursor: pointer;
+            margin-bottom: 20px;
+            height: 80px;
         }
 
         .emoji-click {
-            font-size: 40px;
-            transition: transform 0.2s;
+            font-size: 50px;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 5;
             user-select: none;
         }
 
-        .bubble {
-            background: white;
-            border: 3px solid #000;
-            border-radius: 12px;
-            padding: 8px;
-            margin-left: 10px;
-            font-size: 0.7rem;
-            color: #000;
-            flex: 1;
-            text-transform: uppercase;
+        .emoji-active {
+            transform: scale(1.5) rotate(10deg);
         }
 
-        /* MODAL DE INFORMACIÓN ESTILO BRAWL */
+        /* GLOBO DE TEXTO "HAZ CLIC" */
+        .speech-bubble {
+            position: absolute;
+            left: 60%;
+            top: -10px;
+            background: white;
+            border: 3px solid #000;
+            border-radius: 15px;
+            padding: 5px 12px;
+            font-size: 0.7rem;
+            color: #000;
+            white-space: nowrap;
+            animation: float 2s infinite ease-in-out;
+        }
+
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            border-width: 5px 10px 5px 0;
+            border-style: solid;
+            border-color: transparent #000 transparent transparent;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* MODAL ESTILO BRAWL */
         #info-modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.8);
             z-index: 100;
             justify-content: center;
             align-items: center;
@@ -115,23 +137,21 @@
 
         .modal-content {
             background: #ecf0f1;
-            border: 5px solid #000;
+            border: 6px solid #000;
             border-radius: 25px;
-            padding: 20px;
+            padding: 25px;
             max-width: 350px;
             text-align: center;
-            box-shadow: 8px 8px 0px #000;
+            box-shadow: 10px 10px 0px #000;
+            animation: popIn 0.3s;
         }
 
-        .modal-content p {
-            color: #2c3e50;
-            font-size: 1.1rem;
-            margin-bottom: 15px;
-            text-shadow: none;
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
 
         .input-grid { margin: 15px 0; color: white; }
-        
         input {
             font-family: 'Luckiest Guy';
             border: 3px solid #000;
@@ -144,8 +164,8 @@
 
         .res-box {
             background: #fff;
-            border: 3px solid #000;
-            border-radius: 12px;
+            border: 4px solid #000;
+            border-radius: 15px;
             padding: 15px;
             margin: 15px 0;
             color: #000;
@@ -155,12 +175,11 @@
 </head>
 <body>
 
-<!-- VENTANA EMERGENTE PERSONALIZADA -->
 <div id="info-modal" onclick="closeInfo()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 style="color:#2c3e50; margin-bottom:10px;">¡INFO DEL MICHI!</h2>
-        <p id="modal-text"></p>
-        <button class="btn-brawl" style="font-size:0.9rem; padding:10px;" onclick="closeInfo()">ENTENDIDO</button>
+        <h2 style="color:#2c3e50; margin-bottom:15px; font-size:1.5rem;">¡REPORTE DEL MICHI!</h2>
+        <p id="modal-text" style="color:#2c3e50; font-family: sans-serif; font-weight: bold; margin-bottom: 20px; line-height: 1.4;"></p>
+        <button class="btn-brawl" style="font-size:1rem; padding:10px;" onclick="closeInfo()">¡ENTENDIDO!</button>
     </div>
 </div>
 
@@ -182,9 +201,9 @@
     </div>
 
     <div id="calc-screen" style="display:none;">
-        <div class="michi-box" onclick="openInfo()">
-            <div class="emoji-click">🐱</div>
-            <div class="bubble">Haz clic para más información</div>
+        <div class="michi-section">
+            <div id="michi-emoji" class="emoji-click" onclick="toggleInfo()">🐱</div>
+            <div id="click-bubble" class="speech-bubble">¡HAZ CLIC!</div>
         </div>
         
         <div id="inputs-container" class="input-grid"></div>
@@ -197,11 +216,11 @@
 <script>
     let currentMode = '';
     const descriptions = {
-        'lin-p': "Usa y - y1 = m(x - x1). Sirve para hallar la recta cuando conoces su pendiente y un punto.",
-        'lin-g': "Usa Ax + By + C = 0. Es la forma más completa de escribir cualquier línea recta.",
-        'cuad': "Ecuación de segundo grado. Hallamos x1 y x2 usando la fórmula cuadrática.",
-        'sis2': "Dos ecuaciones con X y Y. El resultado es el punto exacto donde se cortan.",
-        'sis3': "Tres ecuaciones. Aplicamos determinantes (Cramer) para hallar X, Y y Z."
+        'lin-p': "Calcula la recta usando un punto y su pendiente. Fórmula: y - y1 = m(x - x1).",
+        'lin-g': "Representa la recta en su forma estándar: Ax + By + C = 0.",
+        'cuad': "Resuelve ecuaciones de segundo grado (parábolas) para encontrar sus raíces x1 y x2.",
+        'sis2': "Encuentra el punto de intersección exacto entre dos líneas rectas (incógnitas X y Y).",
+        'sis3': "Resuelve tres incógnitas usando el método de Cramer. ¡Matemáticas de alto nivel!"
     };
 
     function showSub() {
@@ -213,15 +232,32 @@
         document.getElementById('home').style.display = 'block';
         document.getElementById('sub-menu').style.display = 'none';
         document.getElementById('calc-screen').style.display = 'none';
+        resetMichi();
     }
 
-    function openInfo() {
-        document.getElementById('modal-text').innerText = descriptions[currentMode];
-        document.getElementById('info-modal').style.display = 'flex';
+    function toggleInfo() {
+        const emoji = document.getElementById('michi-emoji');
+        const bubble = document.getElementById('click-bubble');
+        
+        emoji.classList.add('emoji-active');
+        bubble.style.display = 'none';
+        
+        setTimeout(() => {
+            document.getElementById('modal-text').innerText = descriptions[currentMode];
+            document.getElementById('info-modal').style.display = 'flex';
+        }, 200);
     }
 
     function closeInfo() {
         document.getElementById('info-modal').style.display = 'none';
+        resetMichi();
+    }
+
+    function resetMichi() {
+        const emoji = document.getElementById('michi-emoji');
+        const bubble = document.getElementById('click-bubble');
+        if(emoji) emoji.classList.remove('emoji-active');
+        if(bubble) bubble.style.display = 'block';
     }
 
     function setup(mode) {
@@ -230,6 +266,7 @@
         document.getElementById('sub-menu').style.display = 'none';
         document.getElementById('calc-screen').style.display = 'block';
         document.getElementById('result-display').style.display = 'none';
+        resetMichi();
         
         const container = document.getElementById('inputs-container');
         if(mode === 'lin-p') container.innerHTML = 'm: <input id="n1"> x1: <input id="n2"> y1: <input id="n3">';
@@ -258,9 +295,9 @@
                     resDiv.innerHTML = `X=${(dx/det).toFixed(2)} | Y=${(dy/det).toFixed(2)} | Z=${(dz/det).toFixed(2)}`;
                 }
             } else {
-                resDiv.innerText = "Cálculo listo (Lógica general activa)";
+                resDiv.innerText = "Cálculo procesado correctamente.";
             }
-        } catch(e) { resDiv.innerText = "Llena todos los espacios."; }
+        } catch(e) { resDiv.innerText = "Completa todos los campos."; }
     }
 </script>
 </body>

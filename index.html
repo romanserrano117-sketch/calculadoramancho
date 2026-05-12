@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Calculadora Mancho</title>
-    <!-- Cargamos Chart.js con prioridad -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
     <style>
@@ -201,6 +200,7 @@
         
         <div id="inputs-container" class="input-grid"></div>
         <button class="btn-brawl" onclick="calculate()">RESOLVER</button>
+        <button id="btn-retry" class="btn-brawl" style="background:#3498db; display:none;" onclick="retry()">REINTENTAR</button>
         
         <div id="result-display" class="res-box" style="display:none;"></div>
         
@@ -249,6 +249,15 @@
         document.getElementById('michi-emoji').classList.remove('emoji-active');
     }
 
+    function retry() {
+        const inputs = document.querySelectorAll('#inputs-container input');
+        inputs.forEach(input => input.value = '');
+        document.getElementById('result-display').style.display = 'none';
+        document.getElementById('graph-wrapper').style.display = 'none';
+        document.getElementById('btn-retry').style.display = 'none';
+        if(chartInstance) { chartInstance.destroy(); chartInstance = null; }
+    }
+
     function setup(mode) {
         currentMode = mode;
         document.getElementById('home').style.display = 'none';
@@ -256,6 +265,7 @@
         document.getElementById('calc-screen').style.display = 'block';
         document.getElementById('result-display').style.display = 'none';
         document.getElementById('graph-wrapper').style.display = 'none';
+        document.getElementById('btn-retry').style.display = 'none';
         document.getElementById('click-bubble').style.display = 'block';
         
         const container = document.getElementById('inputs-container');
@@ -269,7 +279,9 @@
     function calculate() {
         const resDiv = document.getElementById('result-display');
         const graphDiv = document.getElementById('graph-wrapper');
+        const retryBtn = document.getElementById('btn-retry');
         resDiv.style.display = 'block';
+        retryBtn.style.display = 'flex';
         
         const val = (id) => {
             const v = parseFloat(document.getElementById(id).value);
@@ -288,7 +300,7 @@
             showGraph = true;
         } else if(currentMode === 'lin-g') {
             const A = val('n1'), B = val('n2'), C = val('n3');
-            if(B === 0) resDiv.innerHTML = `Línea Vertical: x = ${(-C/A).toFixed(2)}`;
+            if(B === 0) resDiv.innerHTML = `x = ${(-C/A).toFixed(2)}`;
             else {
                 const m = -A/B; const b = -C/B;
                 resDiv.innerHTML = `y = ${m.toFixed(2)}x + (${b.toFixed(2)})`;
@@ -298,7 +310,7 @@
         } else if(currentMode === 'cuad') {
             const a = val('n1'), b = val('n2'), c = val('n3');
             const disc = b*b - 4*a*c;
-            if(a === 0) resDiv.innerHTML = "No es cuadrática (a=0)";
+            if(a === 0) resDiv.innerHTML = "No es cuadrática";
             else if(disc < 0) resDiv.innerHTML = "Raíces Imaginarias";
             else resDiv.innerHTML = `x1: ${((-b+Math.sqrt(disc))/(2*a)).toFixed(2)} | x2: ${((-b-Math.sqrt(disc))/(2*a)).toFixed(2)}`;
             dataPoints = labels.map(x => a*x*x + b*x + c);
@@ -313,7 +325,7 @@
             const a2=val('n5'), b2=val('n6'), c2=val('n7'), d2=val('n8');
             const a3=val('n9'), b3=val('n10'), c3=val('n11'), d3=val('n12');
             const det = a1*(b2*c3-b3*c2) - b1*(a2*c3-a3*c2) + c1*(a2*b3-a3*b2);
-            if(det === 0) resDiv.innerHTML = "Determinante 0";
+            if(det === 0) resDiv.innerHTML = "Det = 0";
             else {
                 const dx = d1*(b2*c3-b3*c2)-b1*(d2*c3-d3*c2)+c1*(d2*b3-d3*b2);
                 const dy = a1*(d2*c3-d3*c2)-d1*(a2*c3-a3*c2)+c1*(a2*d3-a3*d2);
@@ -331,7 +343,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Gráfica f(x)',
+                        label: 'f(x)',
                         data: dataPoints,
                         borderColor: '#ffcc00',
                         borderWidth: 3,
@@ -345,8 +357,6 @@
                     scales: { y: { beginAtZero: false } }
                 }
             });
-        } else {
-            graphDiv.style.display = 'none';
         }
     }
 </script>

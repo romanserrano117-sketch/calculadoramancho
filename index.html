@@ -13,6 +13,8 @@
             --brawl-card: #3c5064;
             --brawl-red: #e74c3c;
             --brawl-gray: #7f8c8d;
+            --line1-color: #ffcc00;
+            --line2-color: #3498db;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -70,16 +72,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: transform 0.1s;
         }
 
         .btn-brawl:active { transform: translateY(3px); box-shadow: 0 2px 0px rgba(0,0,0,0.2); }
 
-        .nav-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
+        .nav-buttons { display: flex; gap: 10px; margin-top: 15px; }
 
         .michi-section {
             position: relative;
@@ -160,7 +157,6 @@
             margin: 15px 0;
             color: #000;
             font-size: 1rem;
-            min-height: 40px;
         }
 
         .chart-container {
@@ -188,7 +184,6 @@
     <h1>CALCULADORA MANCHO</h1>
     <span class="dev-tag">ROMÁN SERRANO DURÁN (mancho)</span>
 
-    <!-- PANTALLA DE INICIO -->
     <div id="home">
         <button class="btn-brawl" onclick="showSub()">LINEAL 🚀</button>
         <button class="btn-brawl" onclick="setup('cuad')">CUADRÁTICA 🐱</button>
@@ -196,14 +191,12 @@
         <button class="btn-brawl" onclick="setup('sis3')">SISTEMA 3X3 🦁</button>
     </div>
 
-    <!-- SUBMENÚ LINEAL -->
     <div id="sub-menu" style="display:none;">
         <button class="btn-brawl" onclick="setup('lin-p')">PUNTO-PENDIENTE</button>
         <button class="btn-brawl" onclick="setup('lin-g')">FORMA GENERAL</button>
         <button class="btn-brawl" style="background:var(--brawl-gray)" onclick="goHome()">VOLVER</button>
     </div>
 
-    <!-- PANTALLA DE CÁLCULO -->
     <div id="calc-screen" style="display:none;">
         <div class="michi-section">
             <div id="michi-emoji" class="emoji-click" onclick="toggleInfo()">🐱</div>
@@ -231,11 +224,11 @@
     let currentMode = '';
     let chartInstance = null;
     const descriptions = {
-        'lin-p': "Usa y - y1 = m(x - x1). Ideal para cuando tienes la pendiente y un punto.",
-        'lin-g': "Ecuación general Ax + By + C = 0. Representa cualquier recta.",
-        'cuad': "Ecuación ax² + b x + c = 0. Encuentra los cortes con el eje X.",
-        'sis2': "Sistema de 2 ecuaciones. El resultado es el punto donde se cruzan.",
-        'sis3': "Sistema 3x3. Resuelto mediante determinantes (Cramer)."
+        'lin-p': "Grafica la recta usando y = m(x - x1) + y1.",
+        'lin-g': "Ecuación Ax + By + C = 0. Grafica despejando Y.",
+        'cuad': "Grafica una parábola ax² + bx + c y marca sus raíces.",
+        'sis2': "Grafica dos rectas para encontrar el punto de intersección.",
+        'sis3': "Resuelve 3 incógnitas (X, Y, Z). No graficable en 2D."
     };
 
     function showSub() {
@@ -254,9 +247,7 @@
         if (currentMode === 'lin-p' || currentMode === 'lin-g') {
             document.getElementById('calc-screen').style.display = 'none';
             document.getElementById('sub-menu').style.display = 'block';
-        } else {
-            goHome();
-        }
+        } else { goHome(); }
     }
 
     function toggleInfo() {
@@ -275,19 +266,14 @@
 
     function retry() {
         const inputs = document.querySelectorAll('#inputs-container input');
-        inputs.forEach(input => input.value = '');
+        inputs.forEach(i => i.value = '');
         document.getElementById('result-display').style.display = 'none';
         document.getElementById('graph-wrapper').style.display = 'none';
         document.getElementById('btn-retry').style.display = 'none';
         clearChart();
     }
 
-    function clearChart() {
-        if(chartInstance) {
-            chartInstance.destroy();
-            chartInstance = null;
-        }
-    }
+    function clearChart() { if(chartInstance) { chartInstance.destroy(); chartInstance = null; } }
 
     function setup(mode) {
         currentMode = mode;
@@ -314,79 +300,57 @@
         resDiv.style.display = 'block';
         retryBtn.style.display = 'flex';
         
-        const val = (id) => {
-            const v = parseFloat(document.getElementById(id).value);
-            return isNaN(v) ? 0 : v;
-        };
-
+        const val = (id) => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : v; };
         let labels = Array.from({length: 21}, (_, i) => i - 10);
-        let dataPoints = [];
-        let showGraph = false;
+        let datasets = [];
 
         if(currentMode === 'lin-p') {
-            const m = val('n1'), x1 = val('n2'), y1 = val('n3');
-            const b = y1 - (m * x1);
+            const m = val('n1'), x1 = val('n2'), y1 = val('n3'), b = y1 - (m * x1);
             resDiv.innerHTML = `y = ${m}x + (${b.toFixed(2)})`;
-            dataPoints = labels.map(x => m*x + b);
-            showGraph = true;
+            datasets.push({ label: 'Recta', data: labels.map(x => m*x + b), borderColor: '#ffcc00' });
         } else if(currentMode === 'lin-g') {
             const A = val('n1'), B = val('n2'), C = val('n3');
             if(B === 0) resDiv.innerHTML = `x = ${(-C/A).toFixed(2)}`;
             else {
                 const m = -A/B; const b = -C/B;
                 resDiv.innerHTML = `y = ${m.toFixed(2)}x + (${b.toFixed(2)})`;
-                dataPoints = labels.map(x => m*x + b);
-                showGraph = true;
+                datasets.push({ label: 'Recta', data: labels.map(x => m*x + b), borderColor: '#ffcc00' });
             }
         } else if(currentMode === 'cuad') {
-            const a = val('n1'), b = val('n2'), c = val('n3');
-            const disc = b*b - 4*a*c;
+            const a = val('n1'), b = val('n2'), c = val('n3'), disc = b*b - 4*a*c;
             if(a === 0) resDiv.innerHTML = "No es cuadrática";
-            else if(disc < 0) resDiv.innerHTML = "Sin raíces reales";
-            else resDiv.innerHTML = `x1: ${((-b+Math.sqrt(disc))/(2*a)).toFixed(2)} | x2: ${((-b-Math.sqrt(disc))/(2*a)).toFixed(2)}`;
-            dataPoints = labels.map(x => a*x*x + b*x + c);
-            showGraph = true;
+            else {
+                resDiv.innerHTML = disc < 0 ? "Sin raíces reales" : `x1: ${((-b+Math.sqrt(disc))/(2*a)).toFixed(2)} | x2: ${((-b-Math.sqrt(disc))/(2*a)).toFixed(2)}`;
+                datasets.push({ label: 'Parábola', data: labels.map(x => a*x*x + b*x + c), borderColor: '#ffcc00' });
+            }
         } else if(currentMode === 'sis2') {
             const a=val('n1'), b=val('n2'), c=val('n3'), d=val('n4'), e=val('n5'), f=val('n6');
             const det = a*e - b*d;
             if(det === 0) resDiv.innerHTML = "Sin solución única";
-            else resDiv.innerHTML = `X: ${((c*e-b*f)/det).toFixed(2)} | Y: ${((a*f-c*d)/det).toFixed(2)}`;
-        } else if(currentMode === 'sis3') {
-            const a1=val('n1'), b1=val('n2'), c1=val('n3'), d1=val('n4');
-            const a2=val('n5'), b2=val('n6'), c2=val('n7'), d2=val('n8');
-            const a3=val('n9'), b3=val('n10'), c3=val('n11'), d3=val('n12');
-            const det = a1*(b2*c3-b3*c2) - b1*(a2*c3-a3*c2) + c1*(a2*b3-a3*b2);
-            if(det === 0) resDiv.innerHTML = "No hay solución";
             else {
-                const dx = d1*(b2*c3-b3*c2)-b1*(d2*c3-d3*c2)+c1*(d2*b3-d3*b2);
-                const dy = a1*(d2*c3-d3*c2)-d1*(a2*c3-a3*c2)+c1*(a2*d3-a3*d2);
-                const dz = a1*(b2*d3-b3*d2)-b1*(a2*d3-a3*d2)+d1*(a2*b3-a3*b2);
+                resDiv.innerHTML = `X: ${((c*e-b*f)/det).toFixed(2)} | Y: ${((a*f-c*d)/det).toFixed(2)}`;
+                // Recta 1: y = (c - ax) / b
+                datasets.push({ label: 'L1', data: labels.map(x => (c - a*x)/b), borderColor: '#ffcc00' });
+                // Recta 2: y = (f - dx) / e
+                datasets.push({ label: 'L2', data: labels.map(x => (f - d*x)/e), borderColor: '#3498db' });
+            }
+        } else if(currentMode === 'sis3') {
+            const a1=val('n1'), b1=val('n2'), c1=val('n3'), d1=val('n4'), a2=val('n5'), b2=val('n6'), c2=val('n7'), d2=val('n8'), a3=val('n9'), b3=val('n10'), c3=val('n11'), d3=val('n12');
+            const det = a1*(b2*c3-b3*c2) - b1*(a2*c3-a3*c2) + c1*(a2*b3-a3*b2);
+            if(det === 0) resDiv.innerHTML = "Sin solución";
+            else {
+                const dx = d1*(b2*c3-b3*c2)-b1*(d2*c3-d3*c2)+c1*(d2*b3-d3*b2), dy = a1*(d2*c3-d3*c2)-d1*(a2*c3-a3*c2)+c1*(a2*d3-a3*d2), dz = a1*(b2*d3-b3*d2)-b1*(a2*d3-a3*d2)+d1*(a2*b3-a3*b2);
                 resDiv.innerHTML = `X=${(dx/det).toFixed(2)} | Y=${(dy/det).toFixed(2)} | Z=${(dz/det).toFixed(2)}`;
             }
         }
 
-        if(showGraph) {
+        if(datasets.length > 0) {
             graphDiv.style.display = 'block';
             clearChart();
-            const ctx = document.getElementById('myChart').getContext('2d');
-            chartInstance = new Chart(ctx, {
+            chartInstance = new Chart(document.getElementById('myChart').getContext('2d'), {
                 type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'f(x)',
-                        data: dataPoints,
-                        borderColor: '#ffcc00',
-                        borderWidth: 3,
-                        fill: false,
-                        pointRadius: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: false } }
-                }
+                data: { labels: labels, datasets: datasets.map(ds => ({ ...ds, borderWidth: 3, pointRadius: 0 })) },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false } } }
             });
         }
     }

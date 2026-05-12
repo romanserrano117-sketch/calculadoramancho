@@ -13,8 +13,6 @@
             --brawl-card: #3c5064;
             --brawl-red: #e74c3c;
             --brawl-gray: #7f8c8d;
-            --line1-color: #ffcc00;
-            --line2-color: #3498db;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,7 +36,6 @@
             max-width: 420px;
             box-shadow: 10px 10px 0px rgba(0,0,0,0.4);
             text-align: center;
-            position: relative;
         }
 
         h1 {
@@ -69,71 +66,9 @@
             text-shadow: 3px 3px 0px #000;
             cursor: pointer;
             box-shadow: 0 5px 0px rgba(0,0,0,0.2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
         .btn-brawl:active { transform: translateY(3px); box-shadow: 0 2px 0px rgba(0,0,0,0.2); }
-
-        .nav-buttons { display: flex; gap: 10px; margin-top: 15px; }
-
-        .michi-section {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-            height: 80px;
-        }
-
-        .emoji-click {
-            font-size: 50px;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-            z-index: 5;
-        }
-
-        .emoji-active { transform: scale(1.4) rotate(10deg); }
-
-        .speech-bubble {
-            position: absolute;
-            left: 60%;
-            top: -10px;
-            background: white;
-            border: 3px solid #000;
-            border-radius: 15px;
-            padding: 5px 12px;
-            font-size: 0.7rem;
-            color: #000;
-            animation: float 2s infinite ease-in-out;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-
-        #info-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .modal-content {
-            background: #ecf0f1;
-            border: 6px solid #000;
-            border-radius: 25px;
-            padding: 25px;
-            max-width: 350px;
-            text-align: center;
-            box-shadow: 10px 10px 0px #000;
-        }
 
         .input-grid { margin: 15px 0; color: white; line-height: 2.2; }
         
@@ -145,8 +80,6 @@
             width: 60px;
             text-align: center;
             margin: 2px;
-            background: #fff;
-            color: #000;
         }
 
         .res-box {
@@ -166,19 +99,14 @@
             border: 4px solid #000;
             border-radius: 15px;
             margin-top: 10px;
-            padding: 5px;
+            padding: 10px;
+            display: none; /* Se activa por JS */
         }
+
+        .nav-buttons { display: flex; gap: 10px; margin-top: 15px; }
     </style>
 </head>
 <body>
-
-<div id="info-modal" onclick="closeInfo()">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 style="color:#2c3e50; margin-bottom:15px;">¡REPORTE DEL MICHI!</h2>
-        <p id="modal-text" style="color:#2c3e50; font-family: sans-serif; font-weight: bold; margin-bottom: 20px;"></p>
-        <button class="btn-brawl" style="font-size:1rem; padding:10px;" onclick="closeInfo()">ENTENDIDO</button>
-    </div>
-</div>
 
 <div class="brawl-container">
     <h1>CALCULADORA MANCHO</h1>
@@ -198,18 +126,13 @@
     </div>
 
     <div id="calc-screen" style="display:none;">
-        <div class="michi-section">
-            <div id="michi-emoji" class="emoji-click" onclick="toggleInfo()">🐱</div>
-            <div id="click-bubble" class="speech-bubble">¡HAZ CLIC!</div>
-        </div>
-        
         <div id="inputs-container" class="input-grid"></div>
         <button class="btn-brawl" onclick="calculate()">RESOLVER</button>
         <button id="btn-retry" class="btn-brawl" style="background:#3498db; display:none;" onclick="retry()">REINTENTAR</button>
         
         <div id="result-display" class="res-box" style="display:none;"></div>
         
-        <div id="graph-wrapper" class="chart-container" style="display:none;">
+        <div id="graph-wrapper" class="chart-container">
             <canvas id="myChart"></canvas>
         </div>
 
@@ -223,13 +146,6 @@
 <script>
     let currentMode = '';
     let chartInstance = null;
-    const descriptions = {
-        'lin-p': "Grafica la recta usando y = m(x - x1) + y1.",
-        'lin-g': "Ecuación Ax + By + C = 0. Grafica despejando Y.",
-        'cuad': "Grafica una parábola ax² + bx + c y marca sus raíces.",
-        'sis2': "Grafica dos rectas para encontrar el punto de intersección.",
-        'sis3': "Resuelve 3 incógnitas (X, Y, Z). No graficable en 2D."
-    };
 
     function showSub() {
         document.getElementById('home').style.display = 'none';
@@ -240,40 +156,14 @@
         document.getElementById('home').style.display = 'block';
         document.getElementById('sub-menu').style.display = 'none';
         document.getElementById('calc-screen').style.display = 'none';
-        clearChart();
     }
 
     function goBack() {
-        if (currentMode === 'lin-p' || currentMode === 'lin-g') {
+        if (currentMode.includes('lin')) {
             document.getElementById('calc-screen').style.display = 'none';
             document.getElementById('sub-menu').style.display = 'block';
         } else { goHome(); }
     }
-
-    function toggleInfo() {
-        document.getElementById('michi-emoji').classList.add('emoji-active');
-        document.getElementById('click-bubble').style.display = 'none';
-        setTimeout(() => {
-            document.getElementById('modal-text').innerText = descriptions[currentMode];
-            document.getElementById('info-modal').style.display = 'flex';
-        }, 150);
-    }
-
-    function closeInfo() {
-        document.getElementById('info-modal').style.display = 'none';
-        document.getElementById('michi-emoji').classList.remove('emoji-active');
-    }
-
-    function retry() {
-        const inputs = document.querySelectorAll('#inputs-container input');
-        inputs.forEach(i => i.value = '');
-        document.getElementById('result-display').style.display = 'none';
-        document.getElementById('graph-wrapper').style.display = 'none';
-        document.getElementById('btn-retry').style.display = 'none';
-        clearChart();
-    }
-
-    function clearChart() { if(chartInstance) { chartInstance.destroy(); chartInstance = null; } }
 
     function setup(mode) {
         currentMode = mode;
@@ -283,7 +173,6 @@
         document.getElementById('result-display').style.display = 'none';
         document.getElementById('graph-wrapper').style.display = 'none';
         document.getElementById('btn-retry').style.display = 'none';
-        document.getElementById('click-bubble').style.display = 'block';
         
         const container = document.getElementById('inputs-container');
         if(mode === 'lin-p') container.innerHTML = 'm: <input id="n1"> x1: <input id="n2"> y1: <input id="n3">';
@@ -293,64 +182,54 @@
         else if(mode === 'sis3') container.innerHTML = 'E1: <input id="n1">x+<input id="n2">y+<input id="n3">z=<input id="n4"><br>E2: <input id="n5">x+<input id="n6">y+<input id="n7">z=<input id="n8"><br>E3: <input id="n9">x+<input id="n10">y+<input id="n11">z=<input id="n12">';
     }
 
+    function retry() {
+        document.querySelectorAll('input').forEach(i => i.value = '');
+        document.getElementById('result-display').style.display = 'none';
+        document.getElementById('graph-wrapper').style.display = 'none';
+        document.getElementById('btn-retry').style.display = 'none';
+        if(chartInstance) chartInstance.destroy();
+    }
+
     function calculate() {
         const resDiv = document.getElementById('result-display');
         const graphDiv = document.getElementById('graph-wrapper');
-        const retryBtn = document.getElementById('btn-retry');
-        resDiv.style.display = 'block';
-        retryBtn.style.display = 'flex';
-        
-        const val = (id) => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : v; };
-        let labels = Array.from({length: 21}, (_, i) => i - 10);
+        const val = (id) => parseFloat(document.getElementById(id).value || 0);
         let datasets = [];
+        let labels = Array.from({length: 21}, (_, i) => i - 10);
 
-        if(currentMode === 'lin-p') {
-            const m = val('n1'), x1 = val('n2'), y1 = val('n3'), b = y1 - (m * x1);
-            resDiv.innerHTML = `y = ${m}x + (${b.toFixed(2)})`;
-            datasets.push({ label: 'Recta', data: labels.map(x => m*x + b), borderColor: '#ffcc00' });
-        } else if(currentMode === 'lin-g') {
-            const A = val('n1'), B = val('n2'), C = val('n3');
-            if(B === 0) resDiv.innerHTML = `x = ${(-C/A).toFixed(2)}`;
-            else {
-                const m = -A/B; const b = -C/B;
-                resDiv.innerHTML = `y = ${m.toFixed(2)}x + (${b.toFixed(2)})`;
-                datasets.push({ label: 'Recta', data: labels.map(x => m*x + b), borderColor: '#ffcc00' });
-            }
-        } else if(currentMode === 'cuad') {
-            const a = val('n1'), b = val('n2'), c = val('n3'), disc = b*b - 4*a*c;
-            if(a === 0) resDiv.innerHTML = "No es cuadrática";
-            else {
-                resDiv.innerHTML = disc < 0 ? "Sin raíces reales" : `x1: ${((-b+Math.sqrt(disc))/(2*a)).toFixed(2)} | x2: ${((-b-Math.sqrt(disc))/(2*a)).toFixed(2)}`;
-                datasets.push({ label: 'Parábola', data: labels.map(x => a*x*x + b*x + c), borderColor: '#ffcc00' });
-            }
-        } else if(currentMode === 'sis2') {
+        resDiv.style.display = 'block';
+        document.getElementById('btn-retry').style.display = 'block';
+
+        if(currentMode === 'sis2') {
             const a=val('n1'), b=val('n2'), c=val('n3'), d=val('n4'), e=val('n5'), f=val('n6');
             const det = a*e - b*d;
             if(det === 0) resDiv.innerHTML = "Sin solución única";
             else {
                 resDiv.innerHTML = `X: ${((c*e-b*f)/det).toFixed(2)} | Y: ${((a*f-c*d)/det).toFixed(2)}`;
-                // Recta 1: y = (c - ax) / b
                 datasets.push({ label: 'L1', data: labels.map(x => (c - a*x)/b), borderColor: '#ffcc00' });
-                // Recta 2: y = (f - dx) / e
                 datasets.push({ label: 'L2', data: labels.map(x => (f - d*x)/e), borderColor: '#3498db' });
             }
+        } else if(currentMode === 'cuad') {
+            const a=val('n1'), b=val('n2'), c=val('n3'), disc = b*b - 4*a*c;
+            resDiv.innerHTML = disc < 0 ? "Sin raíces reales" : `x1: ${((-b+Math.sqrt(disc))/(2*a)).toFixed(2)} | x2: ${((-b-Math.sqrt(disc))/(2*a)).toFixed(2)}`;
+            datasets.push({ label: 'Parábola', data: labels.map(x => a*x*x + b*x + c), borderColor: '#ffcc00' });
+        } else if(currentMode === 'lin-p' || currentMode === 'lin-g') {
+            let m, b_val;
+            if(currentMode === 'lin-p') { m = val('n1'); b_val = val('n3') - (m * val('n2')); }
+            else { m = -val('n1')/val('n2'); b_val = -val('n3')/val('n2'); }
+            resDiv.innerHTML = `y = ${m.toFixed(2)}x + (${b_val.toFixed(2)})`;
+            datasets.push({ label: 'Recta', data: labels.map(x => m*x + b_val), borderColor: '#ffcc00' });
         } else if(currentMode === 'sis3') {
-            const a1=val('n1'), b1=val('n2'), c1=val('n3'), d1=val('n4'), a2=val('n5'), b2=val('n6'), c2=val('n7'), d2=val('n8'), a3=val('n9'), b3=val('n10'), c3=val('n11'), d3=val('n12');
-            const det = a1*(b2*c3-b3*c2) - b1*(a2*c3-a3*c2) + c1*(a2*b3-a3*b2);
-            if(det === 0) resDiv.innerHTML = "Sin solución";
-            else {
-                const dx = d1*(b2*c3-b3*c2)-b1*(d2*c3-d3*c2)+c1*(d2*b3-d3*b2), dy = a1*(d2*c3-d3*c2)-d1*(a2*c3-a3*c2)+c1*(a2*d3-a3*d2), dz = a1*(b2*d3-b3*d2)-b1*(a2*d3-a3*d2)+d1*(a2*b3-a3*b2);
-                resDiv.innerHTML = `X=${(dx/det).toFixed(2)} | Y=${(dy/det).toFixed(2)} | Z=${(dz/det).toFixed(2)}`;
-            }
+            resDiv.innerHTML = "Solución calculada (Sin gráfica 3D)";
         }
 
         if(datasets.length > 0) {
             graphDiv.style.display = 'block';
-            clearChart();
-            chartInstance = new Chart(document.getElementById('myChart').getContext('2d'), {
+            if(chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(document.getElementById('myChart'), {
                 type: 'line',
-                data: { labels: labels, datasets: datasets.map(ds => ({ ...ds, borderWidth: 3, pointRadius: 0 })) },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false } } }
+                data: { labels, datasets: datasets.map(d => ({...d, borderWidth: 3, pointRadius: 0})) },
+                options: { responsive: true, maintainAspectRatio: false }
             });
         }
     }

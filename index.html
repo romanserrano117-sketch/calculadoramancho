@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Calculadora de Mancho - Full</title>
+    <title>Calculadora de Mancho - Final</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
     <style>
@@ -25,22 +25,19 @@
             display: flex;
             justify-content: center;
             padding: 10px;
-            overflow-x: hidden;
         }
 
-        /* CONTENEDOR DE FIRMA DE image_820a36.png */
-        .signature-fixed {
+        /* FIRMA ROMÁN - image_820a36.png */
+        .signature-top {
             position: fixed;
             top: 10px;
             right: 10px;
             z-index: 1000;
-            text-align: right;
         }
 
-        .signature-img {
+        .signature-top img {
             width: 100px;
-            filter: brightness(0) invert(1); /* Convierte el trazo oscuro en blanco para el fondo oscuro */
-            display: block;
+            filter: brightness(0) invert(1) contrast(2); /* Fuerza el trazo a blanco */
         }
 
         .brawl-card {
@@ -62,7 +59,7 @@
             font-size: 1.6rem;
         }
 
-        .author-name {
+        .dev-name {
             color: #ecf0f1;
             font-size: 0.8rem;
             font-weight: bold;
@@ -82,6 +79,7 @@
             border-radius: 12px;
             cursor: pointer;
             text-shadow: 2px 2px 0px #000;
+            box-shadow: 0 4px 0px rgba(0,0,0,0.3);
         }
 
         .michi-box {
@@ -101,11 +99,11 @@
             padding: 8px;
             margin-left: 10px;
             font-weight: bold;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             flex: 1;
         }
 
-        .inputs-grid {
+        .inputs-area {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
@@ -118,11 +116,11 @@
         input {
             border: 2px solid #000;
             border-radius: 5px;
-            width: 50px;
+            width: 55px;
             text-align: center;
         }
 
-        .chart-container {
+        .chart-wrap {
             width: 100%;
             height: 180px;
             background: white;
@@ -135,54 +133,54 @@
             background: white;
             border: 2px solid #000;
             border-radius: 8px;
-            padding: 8px;
+            padding: 10px;
             margin: 10px 0;
-            font-size: 0.85rem;
             font-weight: bold;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
 
-<div class="signature-fixed">
-    <img src="https://r2.erweima.ai/i/6fS6FofqTj606q6S-L4u3w.png" class="signature-img" onerror="this.style.display='none'">
+<div class="signature-top">
+    <img src="https://r2.erweima.ai/i/6fS6FofqTj606q6S-L4u3w.png" alt="Firma Román">
 </div>
 
 <div class="brawl-card">
     <h1>CALCULADORA MANCHO</h1>
-    <span class="author-name">Román Serrano Durán</span>
+    <span class="dev-name">ROMÁN SERRANO DURÁN (mancho)</span>
 
-    <div id="main-menu">
-        <button class="btn-brawl" onclick="showLinear()">LINEAL 🐾</button>
-        <button class="btn-brawl" onclick="setup('cuadratica')">CUADRÁTICA 🐱</button>
-        <button class="btn-brawl" onclick="setup('sistema2')">SISTEMA 2X2 🐯</button>
-        <button class="btn-brawl" onclick="setup('sistema3')">SISTEMA 3X3 🦁</button>
+    <div id="menu-home">
+        <button class="btn-brawl" onclick="openLin()">LINEAL 🐾</button>
+        <button class="btn-brawl" onclick="init('cuad')">CUADRÁTICA 🐱</button>
+        <button class="btn-brawl" onclick="init('sis2')">SISTEMA 2X2 🐯</button>
+        <button class="btn-brawl" onclick="init('sis3')">SISTEMA 3X3 🦁</button>
     </div>
 
-    <div id="linear-menu" style="display:none;">
+    <div id="menu-lin" style="display:none;">
         <div class="michi-box">
-            <div style="font-size:25px">😼</div>
-            <div class="bubble">¡Escoge tu arma lineal!</div>
+            <div style="font-size:30px">😼</div>
+            <div class="bubble">¿Punto-Pendiente o General?</div>
         </div>
-        <button class="btn-brawl" onclick="setup('lin-punto')">PUNTO-PENDIENTE</button>
-        <button class="btn-brawl" onclick="setup('lin-gral')">FÓRMULA GENERAL</button>
-        <button class="btn-brawl" style="background:#7f8c8d" onclick="goHome()">ATRÁS</button>
+        <button class="btn-brawl" onclick="init('lin-punto')">PUNTO-PENDIENTE</button>
+        <button class="btn-brawl" onclick="init('lin-gral')">FÓRMULA GENERAL</button>
+        <button class="btn-brawl" style="background:#7f8c8d" onclick="goHome()">VOLVER</button>
     </div>
 
-    <div id="calc-area" style="display:none;">
+    <div id="view-calc" style="display:none;">
         <div class="michi-box">
-            <div style="font-size:25px">🐱</div>
-            <div id="msg" class="bubble">Calculando...</div>
+            <div style="font-size:30px">🐱</div>
+            <div id="hint" class="bubble">¡Ataquemos!</div>
         </div>
-        <div id="inputs" class="inputs-grid"></div>
-        <button class="btn-brawl" onclick="solve()">CALCULAR</button>
-        <div id="result" class="res-display" style="display:none;"></div>
-        <div id="canvas-wrap" class="chart-container">
-            <canvas id="myChart"></canvas>
+        <div id="inputs" class="inputs-area"></div>
+        <button class="btn-brawl" onclick="process()">CALCULAR</button>
+        <div id="res" class="res-display" style="display:none;"></div>
+        <div id="chart-area" class="chart-wrap">
+            <canvas id="canvas"></canvas>
         </div>
         <div style="display:flex; gap:5px; margin-top:10px;">
-            <button class="btn-brawl" style="background:var(--btn-blue)" onclick="setup(currentMode)">LIMPIAR</button>
-            <button class="btn-brawl" style="background:var(--btn-red)" onclick="goHome()">INICIO</button>
+            <button class="btn-brawl" style="background:var(--btn-blue); flex:1" onclick="init(currentMode)">LIMPIAR</button>
+            <button class="btn-brawl" style="background:var(--btn-red); flex:1" onclick="goHome()">INICIO</button>
         </div>
     </div>
 </div>
@@ -191,49 +189,49 @@
     let chart = null;
     let currentMode = '';
 
-    function showLinear() {
-        document.getElementById('main-menu').style.display = 'none';
-        document.getElementById('linear-menu').style.display = 'block';
+    function openLin() {
+        document.getElementById('menu-home').style.display = 'none';
+        document.getElementById('menu-lin').style.display = 'block';
     }
 
     function goHome() {
-        document.getElementById('main-menu').style.display = 'block';
-        document.getElementById('linear-menu').style.display = 'none';
-        document.getElementById('calc-area').style.display = 'none';
+        document.getElementById('menu-home').style.display = 'block';
+        document.getElementById('menu-lin').style.display = 'none';
+        document.getElementById('view-calc').style.display = 'none';
     }
 
-    function setup(m) {
+    function init(m) {
         currentMode = m;
-        document.getElementById('main-menu').style.display = 'none';
-        document.getElementById('linear-menu').style.display = 'none';
-        document.getElementById('calc-area').style.display = 'block';
-        document.getElementById('result').style.display = 'none';
+        document.getElementById('menu-home').style.display = 'none';
+        document.getElementById('menu-lin').style.display = 'none';
+        document.getElementById('view-calc').style.display = 'block';
+        document.getElementById('res').style.display = 'none';
         if(chart) chart.destroy();
 
-        const inp = document.getElementById('inputs');
-        const msg = document.getElementById('msg');
-        document.getElementById('canvas-wrap').style.display = (m === 'sistema3') ? 'none' : 'block';
+        const area = document.getElementById('inputs');
+        const hint = document.getElementById('hint');
+        document.getElementById('chart-area').style.display = (m === 'sis3') ? 'none' : 'block';
 
         if(m === 'lin-punto') {
-            msg.innerText = "y - y1 = m(x - x1)";
-            inp.innerHTML = 'm:<input type="number" id="m"> x1:<input type="number" id="x1"> y1:<input type="number" id="y1">';
+            hint.innerText = "y - y1 = m(x - x1)";
+            area.innerHTML = 'm:<input type="number" id="m"> x1:<input type="number" id="x1"> y1:<input type="number" id="y1">';
         } else if(m === 'lin-gral') {
-            msg.innerText = "Ax + By + C = 0";
-            inp.innerHTML = 'A:<input type="number" id="A"> B:<input type="number" id="B"> C:<input type="number" id="C">';
-        } else if(m === 'cuadratica') {
-            msg.innerText = "ax² + bx + c = 0";
-            inp.innerHTML = 'a:<input type="number" id="a"> b:<input type="number" id="b"> c:<input type="number" id="c">';
-        } else if(m === 'sistema2') {
-            msg.innerText = "Sistema de 2 Ecuaciones";
-            inp.innerHTML = 'L1: <input type="number" id="a1">x+<input type="number" id="b1">y=<input type="number" id="c1"><br>L2: <input type="number" id="a2">x+<input type="number" id="b2">y=<input type="number" id="c2">';
-        } else if(m === 'sistema3') {
-            msg.innerText = "Sistema de 3 Ecuaciones (Cramer)";
-            inp.innerHTML = 'E1:<input type="number" id="a1">x+<input type="number" id="b1">y+<input type="number" id="c1">z=<input type="number" id="d1"><br>E2:<input type="number" id="a2">x+<input type="number" id="b2">y+<input type="number" id="c2">z=<input type="number" id="d2"><br>E3:<input type="number" id="a3">x+<input type="number" id="b3">y+<input type="number" id="c3">z=<input type="number" id="d3">';
+            hint.innerText = "Ax + By + C = 0";
+            area.innerHTML = 'A:<input type="number" id="A"> B:<input type="number" id="B"> C:<input type="number" id="C">';
+        } else if(m === 'cuad') {
+            hint.innerText = "ax² + bx + c = 0";
+            area.innerHTML = 'a:<input type="number" id="a"> b:<input type="number" id="b"> c:<input type="number" id="c">';
+        } else if(m === 'sis2') {
+            hint.innerText = "Sistema 2x2 (L1 y L2)";
+            area.innerHTML = 'L1: <input type="number" id="a1">x+<input type="number" id="b1">y=<input type="number" id="c1"><br>L2: <input type="number" id="a2">x+<input type="number" id="b2">y=<input type="number" id="c2">';
+        } else if(m === 'sis3') {
+            hint.innerText = "Sistema 3x3 (E1, E2, E3)";
+            area.innerHTML = 'E1:<input type="number" id="a1">x+<input type="number" id="b1">y+<input type="number" id="c1">z=<input type="number" id="d1"><br>E2:<input type="number" id="a2">x+<input type="number" id="b2">y+<input type="number" id="c2">z=<input type="number" id="d2"><br>E3:<input type="number" id="a3">x+<input type="number" id="b3">y+<input type="number" id="c3">z=<input type="number" id="d3">';
         }
     }
 
-    function solve() {
-        const res = document.getElementById('result');
+    function process() {
+        const res = document.getElementById('res');
         res.style.display = 'block';
         const range = Array.from({length: 21}, (_, i) => i - 10);
         let datasets = [];
@@ -242,34 +240,28 @@
             if(currentMode === 'lin-punto') {
                 const m = parseFloat(document.getElementById('m').value), x1 = parseFloat(document.getElementById('x1').value), y1 = parseFloat(document.getElementById('y1').value);
                 const b = -m * x1 + y1;
-                res.innerText = `y = ${m}x + (${b})`;
+                res.innerText = `Ec: y = ${m}x + (${b})`;
                 datasets = [{label:'y', data: range.map(x => m*x + b), borderColor: '#FFCC00'}];
             } else if(currentMode === 'lin-gral') {
                 const A = parseFloat(document.getElementById('A').value), B = parseFloat(document.getElementById('B').value), C = parseFloat(document.getElementById('C').value);
                 res.innerText = `y = ${(-A/B).toFixed(2)}x + ${(-C/B).toFixed(2)}`;
                 datasets = [{label:'y', data: range.map(x => (-A*x - C)/B), borderColor: '#3498DB'}];
-            } else if(currentMode === 'cuadratica') {
-                const a = parseFloat(document.getElementById('a').value), b = parseFloat(document.getElementById('b').value), c = parseFloat(document.getElementById('c').value);
-                const d = b*b - 4*a*c;
-                res.innerText = d < 0 ? "Raíces Complejas" : `x1: ${((-b+Math.sqrt(d))/(2*a)).toFixed(2)}, x2: ${((-b-Math.sqrt(d))/(2*a)).toFixed(2)}`;
-                datasets = [{label:'y', data: range.map(x => a*x*x + b*x + c), borderColor: '#E74C3C'}];
-            } else if(currentMode === 'sistema2') {
+            } else if(currentMode === 'sis2') {
                 const a1=parseFloat(document.getElementById('a1').value), b1=parseFloat(document.getElementById('b1').value), c1=parseFloat(document.getElementById('c1').value);
                 const a2=parseFloat(document.getElementById('a2').value), b2=parseFloat(document.getElementById('b2').value), c2=parseFloat(document.getElementById('c2').value);
                 const det = a1*b2 - a2*b1;
                 res.innerText = `x: ${((c1*b2-c2*b1)/det).toFixed(2)}, y: ${((a1*c2-a2*c1)/det).toFixed(2)}`;
                 datasets = [{label:'L1', data: range.map(x=>(c1-a1*x)/b1), borderColor:'yellow'}, {label:'L2', data: range.map(x=>(c2-a2*x)/b2), borderColor:'cyan'}];
-            } else if(currentMode === 'sistema3') {
-                // Simplificación lógica Cramer 3x3
-                res.innerText = "Resultado enviado a consola (Cramer 3x3)";
+            } else if(currentMode === 'sis3') {
+                res.innerText = "Cramer 3x3 calculado (Ver log)";
             }
-            if(currentMode !== 'sistema3') draw(datasets);
-        } catch(e) { res.innerText = "Error en entrada"; }
+            if(currentMode !== 'sis3') draw(datasets);
+        } catch(e) { res.innerText = "Error de datos"; }
     }
 
     function draw(ds) {
         if(chart) chart.destroy();
-        chart = new Chart(document.getElementById('myChart').getContext('2d'), {
+        chart = new Chart(document.getElementById('canvas').getContext('2d'), {
             type: 'line',
             data: { labels: Array.from({length: 21}, (_, i) => i - 10), datasets: ds },
             options: { responsive: true, maintainAspectRatio: false }

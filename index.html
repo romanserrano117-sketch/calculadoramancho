@@ -77,7 +77,7 @@
             border: 3px solid #000;
             border-radius: 8px;
             padding: 5px;
-            width: 60px;
+            width: 55px;
             text-align: center;
             margin: 2px;
         }
@@ -90,6 +90,7 @@
             margin: 15px 0;
             color: #000;
             font-size: 1rem;
+            word-wrap: break-word;
         }
 
         .chart-container {
@@ -100,7 +101,7 @@
             border-radius: 15px;
             margin-top: 10px;
             padding: 10px;
-            display: none; /* Se activa por JS */
+            display: none;
         }
 
         .nav-buttons { display: flex; gap: 10px; margin-top: 15px; }
@@ -156,10 +157,11 @@
         document.getElementById('home').style.display = 'block';
         document.getElementById('sub-menu').style.display = 'none';
         document.getElementById('calc-screen').style.display = 'none';
+        if(chartInstance) chartInstance.destroy();
     }
 
     function goBack() {
-        if (currentMode.includes('lin')) {
+        if (currentMode === 'lin-p' || currentMode === 'lin-g') {
             document.getElementById('calc-screen').style.display = 'none';
             document.getElementById('sub-menu').style.display = 'block';
         } else { goHome(); }
@@ -211,16 +213,34 @@
             }
         } else if(currentMode === 'cuad') {
             const a=val('n1'), b=val('n2'), c=val('n3'), disc = b*b - 4*a*c;
-            resDiv.innerHTML = disc < 0 ? "Sin raíces reales" : `x1: ${((-b+Math.sqrt(disc))/(2*a)).toFixed(2)} | x2: ${((-b-Math.sqrt(disc))/(2*a)).toFixed(2)}`;
-            datasets.push({ label: 'Parábola', data: labels.map(x => a*x*x + b*x + c), borderColor: '#ffcc00' });
-        } else if(currentMode === 'lin-p' || currentMode === 'lin-g') {
+            if(a === 0) resDiv.innerHTML = "No es cuadrática";
+            else {
+                resDiv.innerHTML = disc < 0 ? "Sin raíces reales" : `x1: ${((-b+Math.sqrt(disc))/(2*a)).toFixed(2)} | x2: ${((-b-Math.sqrt(disc))/(2*a)).toFixed(2)}`;
+                datasets.push({ label: 'Parábola', data: labels.map(x => a*x*x + b*x + c), borderColor: '#ffcc00' });
+            }
+        } else if(currentMode.includes('lin')) {
             let m, b_val;
             if(currentMode === 'lin-p') { m = val('n1'); b_val = val('n3') - (m * val('n2')); }
             else { m = -val('n1')/val('n2'); b_val = -val('n3')/val('n2'); }
             resDiv.innerHTML = `y = ${m.toFixed(2)}x + (${b_val.toFixed(2)})`;
             datasets.push({ label: 'Recta', data: labels.map(x => m*x + b_val), borderColor: '#ffcc00' });
         } else if(currentMode === 'sis3') {
-            resDiv.innerHTML = "Solución calculada (Sin gráfica 3D)";
+            const a1=val('n1'), b1=val('n2'), c1=val('n3'), d1=val('n4');
+            const a2=val('n5'), b2=val('n6'), c2=val('n7'), d2=val('n8');
+            const a3=val('n9'), b3=val('n10'), c3=val('n11'), d3=val('n12');
+            
+            // Determinante Principal
+            const detP = a1*(b2*c3 - b3*c2) - b1*(a2*c3 - a3*c2) + c1*(a2*b3 - a3*b2);
+            
+            if(detP === 0) {
+                resDiv.innerHTML = "El sistema no tiene solución única (Det=0)";
+            } else {
+                const detX = d1*(b2*c3 - b3*c2) - b1*(d2*c3 - d3*c2) + c1*(d2*b3 - d3*b2);
+                const detY = a1*(d2*c3 - d3*c2) - d1*(a2*c3 - a3*c2) + c1*(a2*d3 - a3*d2);
+                const detZ = a1*(b2*d3 - b3*d2) - b1*(a2*d3 - a3*d2) + d1*(a2*b3 - a3*b2);
+                
+                resDiv.innerHTML = `X: ${(detX/detP).toFixed(2)} | Y: ${(detY/detP).toFixed(2)} | Z: ${(detZ/detP).toFixed(2)}`;
+            }
         }
 
         if(datasets.length > 0) {

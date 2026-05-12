@@ -74,42 +74,29 @@
 
         .btn-brawl:active { transform: translateY(3px); box-shadow: 0 2px 0px rgba(0,0,0,0.2); }
 
-        .michi-section {
-            position: relative;
-            display: flex; /* Asegura que se vea */
+        /* Estilos del Zoom de Gráfica */
+        #zoom-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 200;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            margin-bottom: 20px;
-            height: 80px;
+            padding: 15px;
         }
 
-        .emoji-click {
-            font-size: 50px;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-            z-index: 5;
-        }
-
-        .emoji-active { transform: scale(1.4) rotate(10deg); }
-
-        .speech-bubble {
-            position: absolute;
-            left: 60%;
-            top: -10px;
+        .zoom-content {
             background: white;
-            border: 3px solid #000;
-            border-radius: 15px;
-            padding: 5px 12px;
-            font-size: 0.7rem;
-            color: #000;
-            animation: float 2s infinite ease-in-out;
+            width: 100%;
+            height: 70vh;
+            border: 6px solid #000;
+            border-radius: 20px;
+            padding: 10px;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-
+        /* Modal del Michi */
         #info-modal {
             display: none;
             position: fixed;
@@ -128,39 +115,51 @@
             padding: 25px;
             max-width: 350px;
             text-align: center;
-            box-shadow: 10px 10px 0px #000;
+        }
+
+        .michi-section {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+            height: 70px;
+        }
+
+        .emoji-click {
+            font-size: 45px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .emoji-active { transform: scale(1.3); }
+
+        .speech-bubble {
+            position: absolute;
+            left: 60%; top: -5px;
+            background: white; border: 2px solid #000;
+            border-radius: 10px; padding: 4px 8px;
+            font-size: 0.6rem;
         }
 
         .input-grid { margin: 15px 0; color: white; line-height: 2.2; }
         
         input {
             font-family: 'Luckiest Guy';
-            border: 3px solid #000;
-            border-radius: 8px;
-            padding: 5px;
-            width: 55px;
-            text-align: center;
-            margin: 2px;
+            border: 3px solid #000; border-radius: 8px;
+            padding: 5px; width: 55px; text-align: center;
         }
 
         .res-box {
-            background: #fff;
-            border: 4px solid #000;
-            border-radius: 15px;
-            padding: 15px;
-            margin: 15px 0;
-            color: #000;
-            font-size: 1rem;
+            background: #fff; border: 4px solid #000;
+            border-radius: 15px; padding: 15px; margin: 15px 0; color: #000;
         }
 
         .chart-container {
-            width: 100%;
-            height: 200px;
-            background: white;
-            border: 4px solid #000;
-            border-radius: 15px;
-            margin-top: 10px;
-            padding: 10px;
+            width: 100%; height: 180px;
+            background: white; border: 4px solid #000;
+            border-radius: 15px; margin-top: 10px;
+            padding: 5px; cursor: zoom-in;
             display: none;
         }
 
@@ -169,11 +168,21 @@
 </head>
 <body>
 
+<!-- Modal de Zoom -->
+<div id="zoom-modal" onclick="closeZoom()">
+    <h2 style="color:var(--brawl-yellow); margin-bottom:10px; text-shadow: 2px 2px #000;">VISTA AMPLIADA</h2>
+    <div class="zoom-content" onclick="event.stopPropagation()">
+        <canvas id="zoomChart"></canvas>
+    </div>
+    <button class="btn-brawl" style="margin-top:20px; max-width:200px;" onclick="closeZoom()">CERRAR ZOOM</button>
+</div>
+
+<!-- Modal Michi -->
 <div id="info-modal" onclick="closeInfo()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 style="color:#2c3e50; margin-bottom:15px;">¡REPORTE DEL MICHI!</h2>
-        <p id="modal-text" style="color:#2c3e50; font-family: sans-serif; font-weight: bold; margin-bottom: 20px;"></p>
-        <button class="btn-brawl" style="font-size:1rem; padding:10px;" onclick="closeInfo()">ENTENDIDO</button>
+        <h2 style="color:#2c3e50; margin-bottom:15px;">REPORTE DEL MICHI</h2>
+        <p id="modal-text" style="color:#2c3e50; font-family: sans-serif; font-weight: bold;"></p>
+        <button class="btn-brawl" style="font-size:1rem; margin-top:20px;" onclick="closeInfo()">OK</button>
     </div>
 </div>
 
@@ -197,16 +206,16 @@
     <div id="calc-screen" style="display:none;">
         <div class="michi-section">
             <div id="michi-emoji" class="emoji-click" onclick="toggleInfo()">🐱</div>
-            <div id="click-bubble" class="speech-bubble">¡HAZ CLIC!</div>
+            <div id="click-bubble" class="speech-bubble">¡DAME CLIC!</div>
         </div>
 
         <div id="inputs-container" class="input-grid"></div>
         <button class="btn-brawl" onclick="calculate()">RESOLVER</button>
-        <button id="btn-retry" class="btn-brawl" style="background:#3498db; display:none;" onclick="retry()">REINTENTAR</button>
+        <button id="btn-retry" class="btn-brawl" style="background:#3498db; display:none;" onclick="retry()">NUEVO</button>
         
         <div id="result-display" class="res-box" style="display:none;"></div>
         
-        <div id="graph-wrapper" class="chart-container">
+        <div id="graph-wrapper" class="chart-container" onclick="openZoom()">
             <canvas id="myChart"></canvas>
         </div>
 
@@ -220,12 +229,14 @@
 <script>
     let currentMode = '';
     let chartInstance = null;
+    let zoomChartInstance = null;
+    let lastDatasets = [];
     const descriptions = {
-        'lin-p': "Calcula y grafica la recta usando la pendiente 'm' y un punto conocido.",
-        'lin-g': "Resuelve la forma Ax + By + C = 0 y genera su representación visual.",
-        'cuad': "Encuentra las raíces de ax² + bx + c y grafica la parábola correspondiente.",
-        'sis2': "Resuelve dos ecuaciones lineales y muestra dónde se intersectan.",
-        'sis3': "Resuelve un sistema de 3 variables usando el método de Cramer."
+        'lin-p': "Usa m y (x,y) para graficar la recta.",
+        'lin-g': "Analiza la forma Ax + By + C = 0.",
+        'cuad': "Calcula raíces reales y dibuja la parábola.",
+        'sis2': "Busca el cruce de dos líneas en el plano.",
+        'sis3': "Resuelve 3 incógnitas con Determinantes (Cramer)."
     };
 
     function showSub() {
@@ -241,25 +252,32 @@
     }
 
     function goBack() {
-        if (currentMode === 'lin-p' || currentMode === 'lin-g') {
+        if (currentMode.includes('lin')) {
             document.getElementById('calc-screen').style.display = 'none';
             document.getElementById('sub-menu').style.display = 'block';
         } else { goHome(); }
     }
 
     function toggleInfo() {
-        document.getElementById('michi-emoji').classList.add('emoji-active');
-        document.getElementById('click-bubble').style.display = 'none';
-        setTimeout(() => {
-            document.getElementById('modal-text').innerText = descriptions[currentMode];
-            document.getElementById('info-modal').style.display = 'flex';
-        }, 150);
+        document.getElementById('modal-text').innerText = descriptions[currentMode];
+        document.getElementById('info-modal').style.display = 'flex';
     }
 
-    function closeInfo() {
-        document.getElementById('info-modal').style.display = 'none';
-        document.getElementById('michi-emoji').classList.remove('emoji-active');
+    function closeInfo() { document.getElementById('info-modal').style.display = 'none'; }
+
+    function openZoom() {
+        if(!lastDatasets.length) return;
+        document.getElementById('zoom-modal').style.display = 'flex';
+        if(zoomChartInstance) zoomChartInstance.destroy();
+        
+        zoomChartInstance = new Chart(document.getElementById('zoomChart'), {
+            type: 'line',
+            data: { labels: Array.from({length: 21}, (_, i) => i - 10), datasets: lastDatasets },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
     }
+
+    function closeZoom() { document.getElementById('zoom-modal').style.display = 'none'; }
 
     function setup(mode) {
         currentMode = mode;
@@ -269,7 +287,6 @@
         document.getElementById('result-display').style.display = 'none';
         document.getElementById('graph-wrapper').style.display = 'none';
         document.getElementById('btn-retry').style.display = 'none';
-        document.getElementById('click-bubble').style.display = 'block';
         
         const container = document.getElementById('inputs-container');
         if(mode === 'lin-p') container.innerHTML = 'm: <input id="n1"> x1: <input id="n2"> y1: <input id="n3">';
@@ -277,15 +294,6 @@
         else if(mode === 'cuad') container.innerHTML = 'a: <input id="n1"> b: <input id="n2"> c: <input id="n3">';
         else if(mode === 'sis2') container.innerHTML = 'L1: <input id="n1">x+<input id="n2">y=<input id="n3"><br>L2: <input id="n4">x+<input id="n5">y=<input id="n6">';
         else if(mode === 'sis3') container.innerHTML = 'E1: <input id="n1">x+<input id="n2">y+<input id="n3">z=<input id="n4"><br>E2: <input id="n5">x+<input id="n6">y+<input id="n7">z=<input id="n8"><br>E3: <input id="n9">x+<input id="n10">y+<input id="n11">z=<input id="n12">';
-    }
-
-    function retry() {
-        document.querySelectorAll('input').forEach(i => i.value = '');
-        document.getElementById('result-display').style.display = 'none';
-        document.getElementById('graph-wrapper').style.display = 'none';
-        document.getElementById('btn-retry').style.display = 'none';
-        document.getElementById('click-bubble').style.display = 'block';
-        if(chartInstance) chartInstance.destroy();
     }
 
     function calculate() {
@@ -304,22 +312,19 @@
             if(det === 0) resDiv.innerHTML = "Sin solución única";
             else {
                 resDiv.innerHTML = `X: ${((c*e-b*f)/det).toFixed(2)} | Y: ${((a*f-c*d)/det).toFixed(2)}`;
-                datasets.push({ label: 'L1', data: labels.map(x => (c - a*x)/b), borderColor: '#ffcc00' });
-                datasets.push({ label: 'L2', data: labels.map(x => (f - d*x)/e), borderColor: '#3498db' });
+                datasets.push({ label: 'L1', data: labels.map(x => (c - a*x)/b), borderColor: '#ffcc00', borderWidth:3, pointRadius:0 });
+                datasets.push({ label: 'L2', data: labels.map(x => (f - d*x)/e), borderColor: '#3498db', borderWidth:3, pointRadius:0 });
             }
         } else if(currentMode === 'cuad') {
             const a=val('n1'), b=val('n2'), c=val('n3'), disc = b*b - 4*a*c;
-            if(a === 0) resDiv.innerHTML = "No es cuadrática";
-            else {
-                resDiv.innerHTML = disc < 0 ? "Sin raíces reales" : `x1: ${((-b+Math.sqrt(disc))/(2*a)).toFixed(2)} | x2: ${((-b-Math.sqrt(disc))/(2*a)).toFixed(2)}`;
-                datasets.push({ label: 'Parábola', data: labels.map(x => a*x*x + b*x + c), borderColor: '#ffcc00' });
-            }
+            resDiv.innerHTML = disc < 0 ? "Sin raíces reales" : `x1: ${((-b+Math.sqrt(disc))/(2*a)).toFixed(2)} | x2: ${((-b-Math.sqrt(disc))/(2*a)).toFixed(2)}`;
+            datasets.push({ label: 'Parábola', data: labels.map(x => a*x*x + b*x + c), borderColor: '#ffcc00', borderWidth:3, pointRadius:0 });
         } else if(currentMode.includes('lin')) {
             let m, b_val;
             if(currentMode === 'lin-p') { m = val('n1'); b_val = val('n3') - (m * val('n2')); }
             else { m = -val('n1')/val('n2'); b_val = -val('n3')/val('n2'); }
             resDiv.innerHTML = `y = ${m.toFixed(2)}x + (${b_val.toFixed(2)})`;
-            datasets.push({ label: 'Recta', data: labels.map(x => m*x + b_val), borderColor: '#ffcc00' });
+            datasets.push({ label: 'Recta', data: labels.map(x => m*x + b_val), borderColor: '#ffcc00', borderWidth:3, pointRadius:0 });
         } else if(currentMode === 'sis3') {
             const a1=val('n1'), b1=val('n2'), c1=val('n3'), d1=val('n4');
             const a2=val('n5'), b2=val('n6'), c2=val('n7'), d2=val('n8');
@@ -327,22 +332,30 @@
             const detP = a1*(b2*c3 - b3*c2) - b1*(a2*c3 - a3*c2) + c1*(a2*b3 - a3*b2);
             if(detP === 0) resDiv.innerHTML = "Sin solución única";
             else {
-                const detX = d1*(b2*c3 - b3*c2) - b1*(d2*c3 - d3*c2) + c1*(d2*b3 - d3*b2);
-                const detY = a1*(d2*c3 - d3*c2) - d1*(a2*c3 - a3*c2) + c1*(a2*d3 - a3*d2);
-                const detZ = a1*(b2*d3 - b3*d2) - b1*(a2*d3 - a3*d2) + d1*(a2*b3 - a3*b2);
-                resDiv.innerHTML = `X: ${(detX/detP).toFixed(2)} | Y: ${(detY/detP).toFixed(2)} | Z: ${(detZ/detP).toFixed(2)}`;
+                const x = (d1*(b2*c3-b3*c2)-b1*(d2*c3-d3*c2)+c1*(d2*b3-d3*b2))/detP;
+                const y = (a1*(d2*c3-d3*c2)-d1*(a2*c3-a3*c2)+c1*(a2*d3-a3*d2))/detP;
+                const z = (a1*(b2*d3-b3*d2)-b1*(a2*d3-a3*d2)+d1*(a2*b3-a3*b2))/detP;
+                resDiv.innerHTML = `X: ${x.toFixed(2)} | Y: ${y.toFixed(2)} | Z: ${z.toFixed(2)}`;
             }
         }
 
         if(datasets.length > 0) {
+            lastDatasets = datasets;
             graphDiv.style.display = 'block';
             if(chartInstance) chartInstance.destroy();
             chartInstance = new Chart(document.getElementById('myChart'), {
                 type: 'line',
-                data: { labels, datasets: datasets.map(d => ({...d, borderWidth: 3, pointRadius: 0})) },
+                data: { labels, datasets },
                 options: { responsive: true, maintainAspectRatio: false }
             });
         }
+    }
+
+    function retry() {
+        document.querySelectorAll('input').forEach(i => i.value = '');
+        document.getElementById('result-display').style.display = 'none';
+        document.getElementById('graph-wrapper').style.display = 'none';
+        document.getElementById('btn-retry').style.display = 'none';
     }
 </script>
 </body>

@@ -57,7 +57,6 @@
             display: block;
         }
 
-        /* Estilos de Navegación según image_82f9d6.png */
         .nav-container {
             display: flex;
             gap: 15px;
@@ -81,7 +80,6 @@
         .btn-blue { background: var(--btn-blue); }
         .btn-red { background: var(--btn-red); }
 
-        /* Diálogo e Icono */
         .michi-dialog {
             display: flex;
             align-items: center;
@@ -103,7 +101,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer; /* Indica que es clicable */
+            cursor: pointer; 
             transition: transform 0.2s;
         }
 
@@ -120,7 +118,7 @@
             flex: 1;
         }
 
-        /* Modal / Ventana Emergente */
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -129,39 +127,38 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.7);
+            background-color: rgba(0,0,0,0.8);
         }
 
         .modal-content {
-            background-color: #fefefe;
+            background-color: white;
             margin: 15% auto;
-            padding: 20px;
-            border: 5px solid var(--primary);
-            border-radius: 20px;
-            width: 70%;
+            padding: 25px;
+            border: 6px solid #000;
+            border-radius: 25px;
+            width: 80%;
             max-width: 400px;
             text-align: center;
-            font-family: 'Arial', sans-serif;
-            box-shadow: 0px 0px 20px var(--primary);
+            box-shadow: 8px 8px 0px var(--primary);
         }
 
-        .modal-title { font-family: 'Luckiest Guy', cursive; color: #333; font-size: 1.5rem; margin-bottom: 10px; }
+        .modal-title { font-family: 'Luckiest Guy', cursive; font-size: 1.8rem; margin-bottom: 10px; color: #333; }
+        .modal-text { font-weight: bold; line-height: 1.4; color: #555; margin-bottom: 20px; }
 
         .section { display: none; }
-        .input-group { margin: 15px 0; color: white; font-weight: bold; }
+        .input-group { margin: 15px 0; color: white; font-weight: bold; font-size: 1.2rem; }
         input { font-family: 'Luckiest Guy', cursive; border: 3px solid #000; border-radius: 10px; padding: 8px; width: 65px; margin: 0 5px; text-align: center; }
-        .res-box { background: white; border: 4px solid #000; border-radius: 15px; padding: 20px; margin: 15px 0; color: #333; font-weight: bold; min-height: 50px; white-space: pre-line; }
+        .res-box { background: white; border: 4px solid #000; border-radius: 15px; padding: 20px; margin: 15px 0; color: #333; font-weight: bold; white-space: pre-line; }
         canvas { background: white; border-radius: 20px; border: 4px solid #000; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-<!-- Ventana Emergente (Modal) -->
 <div id="michiModal" class="modal" onclick="closeModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <div id="modal-title" class="modal-title">INFO GATUNA</div>
-        <p id="modal-text"></p>
-        <button class="btn-brawl" style="font-size: 1rem; padding: 10px;" onclick="closeModal()">¡ENTENDIDO!</button>
+        <div id="modal-title" class="modal-title">INFO</div>
+        <p id="modal-text" class="modal-text"></p>
+        <button class="btn-brawl" style="font-size: 1.1rem; padding: 10px;" onclick="closeModal()">¡ENTENDIDO!</button>
     </div>
 </div>
 
@@ -177,9 +174,8 @@
 
     <div id="calc-mode" class="section">
         <div class="michi-dialog">
-            <!-- El clic aquí activa la descripción -->
             <div id="michi-img" class="michi-icon" onclick="showInfo()">🐱</div>
-            <div class="bubble" id="michi-speech">¡Miau!</div>
+            <div class="bubble" id="michi-speech">¡Miau! Toca mi cara para aprender.</div>
         </div>
 
         <div id="input-container"></div>
@@ -198,25 +194,21 @@
     let currentMode = '';
     let myChart = null;
 
-    // Descripciones de las ecuaciones
-    const infoEcuaciones = {
-        lineal: {
-            titulo: "ECUACIÓN LINEAL",
-            desc: "Es una línea recta. Representa un cambio constante, como un gato caminando a la misma velocidad. ¡Solo buscamos dónde cruza el suelo!"
-        },
-        cuadratica: {
-            titulo: "ECUACIÓN CUADRÁTICA",
-            desc: "Forma una parábola (una curva). Es como el salto de un michi. Puede tener dos soluciones, una o ninguna si el gato nunca toca el suelo."
-        },
-        sistema: {
-            titulo: "SISTEMA 2X2",
-            desc: "Dos líneas que se cruzan. El resultado es el punto exacto donde dos gatos se encuentran para jugar."
-        },
-        sistema3x3: {
-            titulo: "SISTEMA 3X3",
-            desc: "Tres ecuaciones con tres incógnitas. Es como un rompecabezas en 3D. ¡Necesitamos mucha energía para resolver este nivel!"
-        }
+    const infoData = {
+        lineal: { t: "LINEAL 🐾", d: "Es una línea recta. Representa un cambio constante. ¡Buscamos el punto exacto donde la línea cruza el suelo!" },
+        cuadratica: { t: "CUADRÁTICA 🐱", d: "Forma una curva llamada parábola. ¡Es como el arco que hace un michi al saltar por su comida!" },
+        sistema: { t: "SISTEMA 2X2 🐯", d: "Dos líneas que se cruzan. La solución es el punto de encuentro donde ambos michis se ven cara a cara." },
+        sistema3x3: { t: "SISTEMA 3X3 🦁", d: "¡Nivel Mega Michi! Tres variables (X, Y, Z). Es como resolver un cubo Rubik matemático." }
     };
+
+    function showInfo() {
+        const info = infoData[currentMode];
+        document.getElementById('modal-title').innerText = info.t;
+        document.getElementById('modal-text').innerText = info.d;
+        document.getElementById('michiModal').style.display = 'block';
+    }
+
+    function closeModal() { document.getElementById('michiModal').style.display = 'none'; }
 
     function startMode(mode) {
         currentMode = mode;
@@ -227,42 +219,25 @@
         document.getElementById('myChart').style.display = (mode === 'sistema3x3') ? 'none' : 'block';
 
         const container = document.getElementById('input-container');
-        const speech = document.getElementById('michi-speech');
         const icon = document.getElementById('michi-img');
 
         if(mode === 'lineal') {
             icon.innerText = '🐱';
-            speech.innerText = "¡Haz clic en mí para saber más!";
             container.innerHTML = '<div class="input-group">y = <input type="number" id="a" placeholder="A"> x + <input type="number" id="b" placeholder="B"></div>';
         } else if(mode === 'cuadratica') {
             icon.innerText = '🐈';
-            speech.innerText = "¡Haz clic en mí para saber más!";
             container.innerHTML = '<div class="input-group"><input type="number" id="a">x² + <input type="number" id="b">x + <input type="number" id="c"> = 0</div>';
         } else if(mode === 'sistema') {
             icon.innerText = '🐯';
-            speech.innerText = "¡Haz clic en mí para saber más!";
             container.innerHTML = '<div class="input-group">L1: <input type="number" id="a1">x + <input type="number" id="b1">y = <input type="number" id="c1"></div>' +
                                   '<div class="input-group">L2: <input type="number" id="a2">x + <input type="number" id="b2">y = <input type="number" id="c2"></div>';
         } else if(mode === 'sistema3x3') {
             icon.innerText = '🦁';
-            speech.innerText = "¡Haz clic en mí para saber más!";
             container.innerHTML = 
                 '<div class="input-group">E1: <input type="number" id="a1">x + <input type="number" id="b1">y + <input type="number" id="c1">z = <input type="number" id="d1"></div>' +
                 '<div class="input-group">E2: <input type="number" id="a2">x + <input type="number" id="b2">y + <input type="number" id="c2">z = <input type="number" id="d2"></div>' +
                 '<div class="input-group">E3: <input type="number" id="a3">x + <input type="number" id="b3">y + <input type="number" id="c3">z = <input type="number" id="d3"></div>';
         }
-    }
-
-    // Funciones del Modal
-    function showInfo() {
-        const info = infoEcuaciones[currentMode];
-        document.getElementById('modal-title').innerText = info.titulo;
-        document.getElementById('modal-text').innerText = info.desc;
-        document.getElementById('michiModal').style.display = 'block';
-    }
-
-    function closeModal() {
-        document.getElementById('michiModal').style.display = 'none';
     }
 
     function resetInputs() { startMode(currentMode); }
@@ -271,11 +246,54 @@
         document.getElementById('calc-mode').style.display = 'none'; 
     }
 
-    // Lógica de cálculo (omitiendo por brevedad, se mantiene igual a la anterior)
     function process() {
         const resDiv = document.getElementById('result');
         resDiv.style.display = 'block';
-        // ... (Aquí va la lógica de cálculo que ya tienes)
+        const labels = Array.from({length: 21}, (_, i) => i - 10);
+
+        try {
+            if(currentMode === 'lineal') {
+                const a = parseFloat(document.getElementById('a').value), b = parseFloat(document.getElementById('b').value);
+                resDiv.innerText = `x = ${(-b/a).toFixed(2)}`;
+                draw([{label: 'Ruta', data: labels.map(i => a*i+b), borderColor: 'orange'}]);
+            } else if(currentMode === 'cuadratica') {
+                const a=parseFloat(document.getElementById('a').value), b=parseFloat(document.getElementById('b').value), c=parseFloat(document.getElementById('c').value);
+                const d = b*b - 4*a*c;
+                resDiv.innerText = d < 0 ? "Sin solución real" : `x1=${((-b+Math.sqrt(d))/(2*a)).toFixed(2)}\nx2=${((-b-Math.sqrt(d))/(2*a)).toFixed(2)}`;
+                draw([{label: 'Salto', data: labels.map(i => a*i*i + b*i + c), borderColor: 'red'}]);
+            } else if(currentMode === 'sistema') {
+                const a1=parseFloat(document.getElementById('a1').value), b1=parseFloat(document.getElementById('b1').value), c1=parseFloat(document.getElementById('c1').value);
+                const a2=parseFloat(document.getElementById('a2').value), b2=parseFloat(document.getElementById('b2').value), c2=parseFloat(document.getElementById('c2').value);
+                const det = a1*b2 - a2*b1;
+                if(det === 0) resDiv.innerText = "Sin solución única";
+                else {
+                    resDiv.innerText = `x = ${((c1*b2 - c2*b1)/det).toFixed(2)}\ny = ${((a1*c2 - a2*c1)/det).toFixed(2)}`;
+                    draw([{label: 'M1', data: labels.map(i => (c1-a1*i)/b1), borderColor: 'cyan'}, {label: 'M2', data: labels.map(i => (c2-a2*i)/b2), borderColor: 'yellow'}]);
+                }
+            } else if(currentMode === 'sistema3x3') {
+                const getV = (id) => parseFloat(document.getElementById(id).value);
+                const a1=getV('a1'), b1=getV('b1'), c1=getV('c1'), d1=getV('d1');
+                const a2=getV('a2'), b2=getV('b2'), c2=getV('c2'), d2=getV('d2');
+                const a3=getV('a3'), b3=getV('b3'), c3=getV('c3'), d3=getV('d3');
+                const detS = a1*(b2*c3 - b3*c2) - b1*(a2*c3 - a3*c2) + c1*(a2*b3 - a3*b2);
+                if(Math.abs(detS) < 0.001) resDiv.innerText = "Sin solución única";
+                else {
+                    const x = (d1*(b2*c3 - b3*c2) - b1*(d2*c3 - d3*c2) + c1*(d2*b3 - d3*b2)) / detS;
+                    const y = (a1*(d2*c3 - d3*c2) - d1*(a2*c3 - a3*c2) + c1*(a2*d3 - a3*d2)) / detS;
+                    const z = (a1*(b2*d3 - b3*d2) - b1*(a2*d3 - a3*d2) + d1*(a2*b3 - a3*b2)) / detS;
+                    resDiv.innerText = `x = ${x.toFixed(2)}\ny = ${y.toFixed(2)}\nz = ${z.toFixed(2)}`;
+                }
+            }
+        } catch(e) { resDiv.innerText = "Error en los datos"; }
+    }
+
+    function draw(datasets) {
+        if(myChart) myChart.destroy();
+        myChart = new Chart(document.getElementById('myChart'), {
+            type: 'line',
+            data: { labels: Array.from({length: 21}, (_, i) => i - 10), datasets: datasets },
+            options: { responsive: true, scales: { y: { grid: { color: 'rgba(0,0,0,0.1)' } } } }
+        });
     }
 </script>
 </body>

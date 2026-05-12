@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Calculadora de Mancho - Pro</title>
+    <title>Calculadora de Mancho - Fixed</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
     <style>
@@ -24,20 +24,23 @@
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            overflow-x: hidden;
             padding: 10px;
         }
 
-        /* FIRMA DE image_820a36.png */
-        .signature-fixed {
+        /* FIRMA CORREGIDA - Usando filtros para forzar visibilidad */
+        .signature-container {
             position: fixed;
-            top: 15px;
-            right: 15px;
-            width: 100px;
-            z-index: 1000;
-            filter: contrast(1.2) brightness(1.1);
-            mix-blend-mode: screen; 
-            pointer-events: none;
+            top: 10px;
+            right: 10px;
+            z-index: 9999;
+        }
+
+        .signature-img {
+            width: 110px;
+            height: auto;
+            display: block;
+            /* Filtros para resaltar el trazo de la firma sobre fondo oscuro */
+            filter: brightness(0) invert(1) contrast(2); 
         }
 
         .brawl-card {
@@ -46,11 +49,10 @@
             border-radius: 25px;
             padding: 20px;
             width: 100%;
-            max-width: 450px;
+            max-width: 420px;
             box-shadow: 8px 8px 0px rgba(0,0,0,0.4);
             text-align: center;
-            margin-top: 60px;
-            position: relative;
+            margin-top: 50px;
         }
 
         h1 {
@@ -58,12 +60,11 @@
             color: var(--primary);
             text-shadow: 3px 3px 0px #000;
             font-size: 1.8rem;
-            margin-bottom: 5px;
         }
 
-        .author-text {
+        .author-tag {
             color: #ecf0f1;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: bold;
             margin-bottom: 20px;
             display: block;
@@ -81,210 +82,178 @@
             border-radius: 15px;
             cursor: pointer;
             text-shadow: 2px 2px 0px #000;
-            box-shadow: 0 4px 0px rgba(0,0,0,0.3);
         }
 
-        .michi-box {
+        .michi-ui {
             display: flex;
             align-items: center;
             background: rgba(0,0,0,0.3);
-            padding: 12px;
+            padding: 10px;
             border-radius: 20px;
             margin-bottom: 15px;
             border: 2px solid #000;
         }
 
-        .michi-head {
-            font-size: 35px;
-            background: white;
-            border: 3px solid #000;
-            border-radius: 50%;
-            width: 55px; height: 55px;
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        .bubble-msg {
+        .bubble {
             background: white;
             border: 3px solid #000;
             border-radius: 12px;
             padding: 10px;
             margin-left: 10px;
             font-weight: bold;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             flex: 1;
         }
 
-        .input-area {
+        .inputs-grid {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             margin: 15px 0;
             color: white;
-            font-family: 'Luckiest Guy', cursive;
+            font-family: 'Luckiest Guy';
         }
 
         input {
             border: 3px solid #000;
-            border-radius: 10px;
-            padding: 8px;
-            width: 65px;
+            border-radius: 8px;
+            padding: 5px;
+            width: 60px;
             text-align: center;
-            font-size: 1rem;
         }
 
-        .res-display {
-            background: #fff;
-            border: 3px solid #000;
-            border-radius: 15px;
-            padding: 15px;
-            margin: 15px 0;
-            font-weight: bold;
-        }
-
-        .canvas-container {
+        .chart-box {
             width: 100%;
-            height: 200px;
-            background: #fff;
+            height: 180px;
+            background: white;
             border: 4px solid #000;
             border-radius: 15px;
             margin-top: 10px;
         }
 
-        .nav-grid { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-nav { font-family: 'Luckiest Guy'; flex: 1; padding: 10px; border: 3px solid #000; border-radius: 12px; color: white; }
+        .nav-btns { display: flex; gap: 8px; margin-top: 15px; }
+        .btn-sm { font-family: 'Luckiest Guy'; flex: 1; padding: 10px; border: 3px solid #000; border-radius: 12px; color: white; }
     </style>
 </head>
 <body>
 
-<img src="https://r2.erweima.ai/i/6fS6FofqTj606q6S-L4u3w.png" class="signature-fixed" alt="Firma">
+<div class="signature-container">
+    <img src="https://r2.erweima.ai/i/6fS6FofqTj606q6S-L4u3w.png" class="signature-img" alt="Firma Román">
+</div>
 
 <div class="brawl-card">
     <h1>CALCULADORA MANCHO</h1>
-    <span class="author-text">Por Román Serrano Durán (mancho)</span>
+    <span class="author-tag">POR: ROMÁN SERRANO DURÁN (mancho)</span>
 
-    <div id="main-menu">
-        <button class="btn-brawl" onclick="showLinearOptions()">LINEAL 🐾</button>
-        <button class="btn-brawl" onclick="init('cuadratica')">CUADRÁTICA 🐱</button>
-        <button class="btn-brawl" onclick="init('sistema')">SISTEMA 2X2 🐯</button>
+    <div id="menu-principal">
+        <button class="btn-brawl" onclick="abrirLineal()">LINEAL 🐾</button>
+        <button class="btn-brawl" onclick="setup('cuadratica')">CUADRÁTICA 🐱</button>
+        <button class="btn-brawl" onclick="setup('sistema')">SISTEMA 2X2 🐯</button>
     </div>
 
-    <!-- Submenú Lineal -->
-    <div id="linear-menu" style="display:none;">
-        <div class="michi-box">
-            <div class="michi-head">😼</div>
-            <div class="bubble-msg">¿Cómo quieres resolver la recta?</div>
+    <div id="menu-lineal" style="display:none;">
+        <div class="michi-ui">
+            <div style="font-size:30px">😼</div>
+            <div class="bubble">¿Punto-Pendiente o General?</div>
         </div>
-        <button class="btn-brawl" onclick="init('lineal-punto')">PUNTO-PENDIENTE</button>
-        <button class="btn-brawl" onclick="init('lineal-general')">FÓRMULA GENERAL</button>
-        <button class="btn-brawl" style="background:#7f8c8d" onclick="home()">VOLVER</button>
+        <button class="btn-brawl" onclick="setup('lineal-punto')">PUNTO-PENDIENTE</button>
+        <button class="btn-brawl" onclick="setup('lineal-general')">FÓRMULA GENERAL</button>
+        <button class="btn-brawl" style="background:#95a5a6" onclick="irInicio()">ATRÁS</button>
     </div>
 
-    <div id="calc-view" style="display:none;">
-        <div class="michi-box">
-            <div class="michi-head">🐱</div>
-            <div id="instruction" class="bubble-msg">Ingresa los datos para atacar:</div>
+    <div id="vista-calc" style="display:none;">
+        <div class="michi-ui">
+            <div style="font-size:30px">🐱</div>
+            <div id="msg" class="bubble">¡Ataquemos los números!</div>
         </div>
-
-        <div id="inputs" class="input-area"></div>
-        <button class="btn-brawl" onclick="calculate()">CALCULAR</button>
-        
-        <div id="res-box" class="res-display" style="display:none;"></div>
-        
-        <div id="chart-wrap" class="canvas-container">
-            <canvas id="mainChart"></canvas>
-        </div>
-
-        <div class="nav-grid">
-            <button class="btn-nav" style="background:var(--btn-blue)" onclick="reset()">LIMPIAR</button>
-            <button class="btn-nav" style="background:var(--btn-red)" onclick="home()">INICIO</button>
+        <div id="zona-inputs" class="inputs-grid"></div>
+        <button class="btn-brawl" onclick="resolver()">CALCULAR</button>
+        <div id="resultado" style="background:white; border:3px solid #000; padding:10px; margin:10px 0; border-radius:10px; font-weight:bold; display:none;"></div>
+        <div class="chart-box"><canvas id="grafica"></canvas></div>
+        <div class="nav-btns">
+            <button class="btn-sm" style="background:var(--btn-blue)" onclick="setup(modoActual)">LIMPIAR</button>
+            <button class="btn-sm" style="background:var(--btn-red)" onclick="irInicio()">INICIO</button>
         </div>
     </div>
 </div>
 
 <script>
-    let chartInstance = null;
-    let mode = '';
+    let chart = null;
+    let modoActual = '';
 
-    function showLinearOptions() {
-        document.getElementById('main-menu').style.display = 'none';
-        document.getElementById('linear-menu').style.display = 'block';
+    function abrirLineal() {
+        document.getElementById('menu-principal').style.display = 'none';
+        document.getElementById('menu-lineal').style.display = 'block';
     }
 
-    function init(m) {
-        mode = m;
-        document.getElementById('main-menu').style.display = 'none';
-        document.getElementById('linear-menu').style.display = 'none';
-        document.getElementById('calc-view').style.display = 'block';
-        document.getElementById('res-box').style.display = 'none';
-        if(chartInstance) chartInstance.destroy();
+    function setup(m) {
+        modoActual = m;
+        document.getElementById('menu-principal').style.display = 'none';
+        document.getElementById('menu-lineal').style.display = 'none';
+        document.getElementById('vista-calc').style.display = 'block';
+        document.getElementById('resultado').style.display = 'none';
+        if(chart) chart.destroy();
 
-        const container = document.getElementById('inputs');
-        const instruction = document.getElementById('instruction');
+        const area = document.getElementById('zona-inputs');
+        const msg = document.getElementById('msg');
 
-        if(mode === 'lineal-punto') {
-            instruction.innerText = "Usa: y - y1 = m(x - x1)";
-            container.innerHTML = 'm=<input type="number" id="m"> x1=<input type="number" id="x1"> y1=<input type="number" id="y1">';
-        } else if(mode === 'lineal-general') {
-            instruction.innerText = "Usa: Ax + By + C = 0";
-            container.innerHTML = 'A=<input type="number" id="A"> B=<input type="number" id="B"> C=<input type="number" id="C">';
-        } else if(mode === 'cuadratica') {
-            container.innerHTML = '<input type="number" id="a">x² + <input type="number" id="b">x + <input type="number" id="c"> = 0';
-        } else if(mode === 'sistema') {
-            container.innerHTML = 'L1: <input type="number" id="a1">x+<input type="number" id="b1">y=<input type="number" id="c1"><br>L2: <input type="number" id="a2">x+<input type="number" id="b2">y=<input type="number" id="c2">';
+        if(m === 'lineal-punto') {
+            msg.innerText = "y - y1 = m(x - x1)";
+            area.innerHTML = 'm:<input type="number" id="m"> x1:<input type="number" id="x1"> y1:<input type="number" id="y1">';
+        } else if(m === 'lineal-general') {
+            msg.innerText = "Ax + By + C = 0";
+            area.innerHTML = 'A:<input type="number" id="A"> B:<input type="number" id="B"> C:<input type="number" id="C">';
+        } else if(m === 'cuadratica') {
+            msg.innerText = "ax² + bx + c = 0";
+            area.innerHTML = '<input type="number" id="a">x² + <input type="number" id="b">x + <input type="number" id="c">';
+        } else if(m === 'sistema') {
+            msg.innerText = "Resuelve por determinantes";
+            area.innerHTML = 'L1: <input type="number" id="a1">x+<input type="number" id="b1">y=<input type="number" id="c1"><br>L2: <input type="number" id="a2">x+<input type="number" id="b2">y=<input type="number" id="c2">';
         }
     }
 
-    function home() {
-        document.getElementById('main-menu').style.display = 'block';
-        document.getElementById('linear-menu').style.display = 'none';
-        document.getElementById('calc-view').style.display = 'none';
+    function irInicio() {
+        document.getElementById('menu-principal').style.display = 'block';
+        document.getElementById('menu-lineal').style.display = 'none';
+        document.getElementById('vista-calc').style.display = 'none';
     }
 
-    function reset() { init(mode); }
-
-    function calculate() {
-        const res = document.getElementById('res-box');
+    function resolver() {
+        const res = document.getElementById('resultado');
         res.style.display = 'block';
-        const range = Array.from({length: 21}, (_, i) => i - 10);
-        let datasets = [];
+        const X = Array.from({length: 21}, (_, i) => i - 10);
+        let data = [];
 
         try {
-            if(mode === 'lineal-punto') {
-                const m = parseFloat(document.getElementById('m').value);
-                const x1 = parseFloat(document.getElementById('x1').value);
-                const y1 = parseFloat(document.getElementById('y1').value);
-                // y = mx - mx1 + y1
+            if(modoActual === 'lineal-punto') {
+                const m = parseFloat(document.getElementById('m').value), x1 = parseFloat(document.getElementById('x1').value), y1 = parseFloat(document.getElementById('y1').value);
                 const b = -m * x1 + y1;
-                res.innerHTML = `Ecuación: y = ${m}x + (${b})`;
-                datasets = [{label: 'Recta', data: range.map(x => m*x + b), borderColor: '#FFCC00', borderWidth: 4}];
-            } else if(mode === 'lineal-general') {
-                const A = parseFloat(document.getElementById('A').value);
-                const B = parseFloat(document.getElementById('B').value);
-                const C = parseFloat(document.getElementById('C').value);
-                // y = (-Ax - C) / B
-                res.innerHTML = `Pendiente: ${(-A/B).toFixed(2)}`;
-                datasets = [{label: 'Recta', data: range.map(x => (-A*x - C)/B), borderColor: '#3498DB', borderWidth: 4}];
-            } else if(mode === 'cuadratica') {
+                res.innerText = `Ecuación: y = ${m}x + (${b})`;
+                data = [{label:'y', data: X.map(x => m*x + b), borderColor: '#FFCC00'}];
+            } else if(modoActual === 'lineal-general') {
+                const A = parseFloat(document.getElementById('A').value), B = parseFloat(document.getElementById('B').value), C = parseFloat(document.getElementById('C').value);
+                res.innerText = `Ecuación: y = ${(-A/B).toFixed(2)}x + ${(-C/B).toFixed(2)}`;
+                data = [{label:'y', data: X.map(x => (-A*x - C)/B), borderColor: '#3498DB'}];
+            } else if(modoActual === 'cuadratica') {
                 const a = parseFloat(document.getElementById('a').value), b = parseFloat(document.getElementById('b').value), c = parseFloat(document.getElementById('c').value);
                 const d = b*b - 4*a*c;
-                res.innerHTML = d < 0 ? "Raíces imaginarias" : `x1: ${((-b+Math.sqrt(d))/(2*a)).toFixed(2)} x2: ${((-b-Math.sqrt(d))/(2*a)).toFixed(2)}`;
-                datasets = [{label: 'Parábola', data: range.map(x => a*x*x + b*x + c), borderColor: '#E74C3C', borderWidth: 4}];
-            } else if(mode === 'sistema') {
+                res.innerText = d < 0 ? "Raíces Complejas" : `x1: ${((-b+Math.sqrt(d))/(2*a)).toFixed(2)} x2: ${((-b-Math.sqrt(d))/(2*a)).toFixed(2)}`;
+                data = [{label:'y', data: X.map(x => a*x*x + b*x + c), borderColor: '#E74C3C'}];
+            } else if(modoActual === 'sistema') {
                 const a1=parseFloat(document.getElementById('a1').value), b1=parseFloat(document.getElementById('b1').value), c1=parseFloat(document.getElementById('c1').value);
                 const a2=parseFloat(document.getElementById('a2').value), b2=parseFloat(document.getElementById('b2').value), c2=parseFloat(document.getElementById('c2').value);
                 const det = a1*b2 - a2*b1;
-                res.innerHTML = `Solución: (${((c1*b2-c2*b1)/det).toFixed(2)}, ${((a1*c2-a2*c1)/det).toFixed(2)})`;
-                datasets = [{label: 'L1', data: range.map(x=>(c1-a1*x)/b1), borderColor: '#FFCC00'}, {label: 'L2', data: range.map(x=>(c2-a2*x)/b2), borderColor: '#3498DB'}];
+                res.innerText = `Intersección: (${((c1*b2-c2*b1)/det).toFixed(2)}, ${((a1*c2-a2*c1)/det).toFixed(2)})`;
+                data = [{label:'L1', data: X.map(x=>(c1-a1*x)/b1), borderColor:'yellow'}, {label:'L2', data: X.map(x=>(c2-a2*x)/b2), borderColor:'cyan'}];
             }
-            draw(datasets);
-        } catch(e) { res.innerText = "¡Revisa los números!"; }
+            dibujar(data);
+        } catch(e) { res.innerText = "Error en los datos"; }
     }
 
-    function draw(ds) {
-        if(chartInstance) chartInstance.destroy();
-        const ctx = document.getElementById('mainChart').getContext('2d');
-        chartInstance = new Chart(ctx, {
+    function dibujar(ds) {
+        if(chart) chart.destroy();
+        chart = new Chart(document.getElementById('grafica').getContext('2d'), {
             type: 'line',
             data: { labels: Array.from({length: 21}, (_, i) => i - 10), datasets: ds },
             options: { responsive: true, maintainAspectRatio: false }

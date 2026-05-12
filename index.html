@@ -36,6 +36,7 @@
             max-width: 420px;
             box-shadow: 10px 10px 0px rgba(0,0,0,0.4);
             text-align: center;
+            position: relative;
         }
 
         h1 {
@@ -66,9 +67,71 @@
             text-shadow: 3px 3px 0px #000;
             cursor: pointer;
             box-shadow: 0 5px 0px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .btn-brawl:active { transform: translateY(3px); box-shadow: 0 2px 0px rgba(0,0,0,0.2); }
+
+        /* Estilos del Michi */
+        .michi-section {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            height: 80px;
+        }
+
+        .emoji-click {
+            font-size: 50px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            z-index: 5;
+        }
+
+        .emoji-active { transform: scale(1.4) rotate(10deg); }
+
+        .speech-bubble {
+            position: absolute;
+            left: 60%;
+            top: -10px;
+            background: white;
+            border: 3px solid #000;
+            border-radius: 15px;
+            padding: 5px 12px;
+            font-size: 0.7rem;
+            color: #000;
+            animation: float 2s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Modal */
+        #info-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #ecf0f1;
+            border: 6px solid #000;
+            border-radius: 25px;
+            padding: 25px;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 10px 10px 0px #000;
+        }
 
         .input-grid { margin: 15px 0; color: white; line-height: 2.2; }
         
@@ -90,7 +153,6 @@
             margin: 15px 0;
             color: #000;
             font-size: 1rem;
-            word-wrap: break-word;
         }
 
         .chart-container {
@@ -108,6 +170,14 @@
     </style>
 </head>
 <body>
+
+<div id="info-modal" onclick="closeInfo()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2 style="color:#2c3e50; margin-bottom:15px;">¡REPORTE DEL MICHI!</h2>
+        <p id="modal-text" style="color:#2c3e50; font-family: sans-serif; font-weight: bold; margin-bottom: 20px;"></p>
+        <button class="btn-brawl" style="font-size:1rem; padding:10px;" onclick="closeInfo()">ENTENDIDO</button>
+    </div>
+</div>
 
 <div class="brawl-container">
     <h1>CALCULADORA MANCHO</h1>
@@ -127,6 +197,11 @@
     </div>
 
     <div id="calc-screen" style="display:none;">
+        <div class="michi-section">
+            <div id="michi-emoji" class="emoji-click" onclick="toggleInfo()">🐱</div>
+            <div id="click-bubble" class="speech-bubble">¡HAZ CLIC!</div>
+        </div>
+
         <div id="inputs-container" class="input-grid"></div>
         <button class="btn-brawl" onclick="calculate()">RESOLVER</button>
         <button id="btn-retry" class="btn-brawl" style="background:#3498db; display:none;" onclick="retry()">REINTENTAR</button>
@@ -147,6 +222,13 @@
 <script>
     let currentMode = '';
     let chartInstance = null;
+    const descriptions = {
+        'lin-p': "Calcula y grafica la recta usando la pendiente 'm' y un punto conocido.",
+        'lin-g': "Resuelve la forma Ax + By + C = 0 y genera su representación visual.",
+        'cuad': "Encuentra las raíces de ax² + bx + c y grafica la parábola correspondiente.",
+        'sis2': "Resuelve dos ecuaciones lineales y muestra dónde se intersectan.",
+        'sis3': "Resuelve un sistema de 3 variables usando el método de Cramer."
+    };
 
     function showSub() {
         document.getElementById('home').style.display = 'none';
@@ -167,6 +249,20 @@
         } else { goHome(); }
     }
 
+    function toggleInfo() {
+        document.getElementById('michi-emoji').classList.add('emoji-active');
+        document.getElementById('click-bubble').style.display = 'none';
+        setTimeout(() => {
+            document.getElementById('modal-text').innerText = descriptions[currentMode];
+            document.getElementById('info-modal').style.display = 'flex';
+        }, 150);
+    }
+
+    function closeInfo() {
+        document.getElementById('info-modal').style.display = 'none';
+        document.getElementById('michi-emoji').classList.remove('emoji-active');
+    }
+
     function setup(mode) {
         currentMode = mode;
         document.getElementById('home').style.display = 'none';
@@ -175,6 +271,7 @@
         document.getElementById('result-display').style.display = 'none';
         document.getElementById('graph-wrapper').style.display = 'none';
         document.getElementById('btn-retry').style.display = 'none';
+        document.getElementById('click-bubble').style.display = 'block';
         
         const container = document.getElementById('inputs-container');
         if(mode === 'lin-p') container.innerHTML = 'm: <input id="n1"> x1: <input id="n2"> y1: <input id="n3">';
@@ -228,17 +325,12 @@
             const a1=val('n1'), b1=val('n2'), c1=val('n3'), d1=val('n4');
             const a2=val('n5'), b2=val('n6'), c2=val('n7'), d2=val('n8');
             const a3=val('n9'), b3=val('n10'), c3=val('n11'), d3=val('n12');
-            
-            // Determinante Principal
             const detP = a1*(b2*c3 - b3*c2) - b1*(a2*c3 - a3*c2) + c1*(a2*b3 - a3*b2);
-            
-            if(detP === 0) {
-                resDiv.innerHTML = "El sistema no tiene solución única (Det=0)";
-            } else {
+            if(detP === 0) resDiv.innerHTML = "Sin solución única";
+            else {
                 const detX = d1*(b2*c3 - b3*c2) - b1*(d2*c3 - d3*c2) + c1*(d2*b3 - d3*b2);
                 const detY = a1*(d2*c3 - d3*c2) - d1*(a2*c3 - a3*c2) + c1*(a2*d3 - a3*d2);
                 const detZ = a1*(b2*d3 - b3*d2) - b1*(a2*d3 - a3*d2) + d1*(a2*b3 - a3*b2);
-                
                 resDiv.innerHTML = `X: ${(detX/detP).toFixed(2)} | Y: ${(detY/detP).toFixed(2)} | Z: ${(detZ/detP).toFixed(2)}`;
             }
         }

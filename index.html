@@ -89,14 +89,14 @@
 
         .zoom-content {
             background: white;
-            width: 100%;
-            height: 70vh;
+            width: 95%;
+            height: 60vh;
             border: 6px solid #000;
             border-radius: 20px;
             padding: 10px;
         }
 
-        /* Modal del Michi */
+        /* Modal Michi */
         #info-modal {
             display: none;
             position: fixed;
@@ -132,8 +132,6 @@
             transition: transform 0.2s;
         }
 
-        .emoji-active { transform: scale(1.3); }
-
         .speech-bubble {
             position: absolute;
             left: 60%; top: -5px;
@@ -156,11 +154,12 @@
         }
 
         .chart-container {
-            width: 100%; height: 180px;
+            width: 100%; height: 200px;
             background: white; border: 4px solid #000;
             border-radius: 15px; margin-top: 10px;
-            padding: 5px; cursor: zoom-in;
+            padding: 5px; cursor: pointer;
             display: none;
+            position: relative;
         }
 
         .nav-buttons { display: flex; gap: 10px; margin-top: 15px; }
@@ -174,7 +173,7 @@
     <div class="zoom-content" onclick="event.stopPropagation()">
         <canvas id="zoomChart"></canvas>
     </div>
-    <button class="btn-brawl" style="margin-top:20px; max-width:200px;" onclick="closeZoom()">CERRAR ZOOM</button>
+    <button class="btn-brawl" style="margin-top:20px; width:200px;" onclick="closeZoom()">VOLVER</button>
 </div>
 
 <!-- Modal Michi -->
@@ -206,7 +205,7 @@
     <div id="calc-screen" style="display:none;">
         <div class="michi-section">
             <div id="michi-emoji" class="emoji-click" onclick="toggleInfo()">🐱</div>
-            <div id="click-bubble" class="speech-bubble">¡DAME CLIC!</div>
+            <div id="click-bubble" class="speech-bubble">¡TÓCAME!</div>
         </div>
 
         <div id="inputs-container" class="input-grid"></div>
@@ -217,6 +216,7 @@
         
         <div id="graph-wrapper" class="chart-container" onclick="openZoom()">
             <canvas id="myChart"></canvas>
+            <div style="position:absolute; top:5px; right:10px; font-size:0.6rem; color:#7f8c8d;">(Toca para ampliar)</div>
         </div>
 
         <div class="nav-buttons">
@@ -230,14 +230,7 @@
     let currentMode = '';
     let chartInstance = null;
     let zoomChartInstance = null;
-    let lastDatasets = [];
-    const descriptions = {
-        'lin-p': "Usa m y (x,y) para graficar la recta.",
-        'lin-g': "Analiza la forma Ax + By + C = 0.",
-        'cuad': "Calcula raíces reales y dibuja la parábola.",
-        'sis2': "Busca el cruce de dos líneas en el plano.",
-        'sis3': "Resuelve 3 incógnitas con Determinantes (Cramer)."
-    };
+    let currentDatasets = []; // Aquí guardaremos los datos para el zoom
 
     function showSub() {
         document.getElementById('home').style.display = 'none';
@@ -259,21 +252,37 @@
     }
 
     function toggleInfo() {
-        document.getElementById('modal-text').innerText = descriptions[currentMode];
+        const desc = {
+            'lin-p': "Pendiente m y un punto (x,y).",
+            'lin-g': "Ecuación general Ax+By+C=0.",
+            'cuad': "Parábola ax²+bx+c.",
+            'sis2': "Intersección de dos rectas.",
+            'sis3': "Sistema 3x3 por determinantes."
+        };
+        document.getElementById('modal-text').innerText = desc[currentMode];
         document.getElementById('info-modal').style.display = 'flex';
     }
 
     function closeInfo() { document.getElementById('info-modal').style.display = 'none'; }
 
     function openZoom() {
-        if(!lastDatasets.length) return;
+        if(currentDatasets.length === 0) return;
         document.getElementById('zoom-modal').style.display = 'flex';
-        if(zoomChartInstance) zoomChartInstance.destroy();
         
-        zoomChartInstance = new Chart(document.getElementById('zoomChart'), {
+        if(zoomChartInstance) zoomChartInstance.destroy();
+        const ctx = document.getElementById('zoomChart').getContext('2d');
+        
+        zoomChartInstance = new Chart(ctx, {
             type: 'line',
-            data: { labels: Array.from({length: 21}, (_, i) => i - 10), datasets: lastDatasets },
-            options: { responsive: true, maintainAspectRatio: false }
+            data: { 
+                labels: Array.from({length: 21}, (_, i) => i - 10), 
+                datasets: JSON.parse(JSON.stringify(currentDatasets)) // Clonar datos
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: false } }
+            }
         });
     }
 
@@ -317,8 +326,8 @@
             }
         } else if(currentMode === 'cuad') {
             const a=val('n1'), b=val('n2'), c=val('n3'), disc = b*b - 4*a*c;
-            resDiv.innerHTML = disc < 0 ? "Sin raíces reales" : `x1: ${((-b+Math.sqrt(disc))/(2*a)).toFixed(2)} | x2: ${((-b-Math.sqrt(disc))/(2*a)).toFixed(2)}`;
-            datasets.push({ label: 'Parábola', data: labels.map(x => a*x*x + b*x + c), borderColor: '#ffcc00', borderWidth:3, pointRadius:0 });
+            resDiv.innerHTML = (a === 0) ? "No es cuadrática" : (disc < 0 ? "Sin raíces reales" : `x1: ${((-b+Math.sqrt(disc))/(2*a)).toFixed(2)} | x2: ${((-b-Math.sqrt(disc))/(2*a)).toFixed(2)}`);
+            if(a !== 0) datasets.push({ label: 'Parábola', data: labels.map(x => a*x*x + b*x + c), borderColor: '#ffcc00', borderWidth:3, pointRadius:0 });
         } else if(currentMode.includes('lin')) {
             let m, b_val;
             if(currentMode === 'lin-p') { m = val('n1'); b_val = val('n3') - (m * val('n2')); }
@@ -340,10 +349,11 @@
         }
 
         if(datasets.length > 0) {
-            lastDatasets = datasets;
+            currentDatasets = datasets; // Guardar para el zoom
             graphDiv.style.display = 'block';
             if(chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(document.getElementById('myChart'), {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: { labels, datasets },
                 options: { responsive: true, maintainAspectRatio: false }
@@ -356,6 +366,7 @@
         document.getElementById('result-display').style.display = 'none';
         document.getElementById('graph-wrapper').style.display = 'none';
         document.getElementById('btn-retry').style.display = 'none';
+        currentDatasets = [];
     }
 </script>
 </body>

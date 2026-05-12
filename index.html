@@ -11,6 +11,8 @@
             --brawl-blue: #314357;
             --brawl-yellow: #ffcc00;
             --brawl-card: #3c5064;
+            --brawl-red: #e74c3c;
+            --brawl-gray: #7f8c8d;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -68,9 +70,16 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            transition: transform 0.1s;
         }
 
         .btn-brawl:active { transform: translateY(3px); box-shadow: 0 2px 0px rgba(0,0,0,0.2); }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
 
         .michi-section {
             position: relative;
@@ -169,7 +178,7 @@
 
 <div id="info-modal" onclick="closeInfo()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 style="color:#2c3e50; margin-bottom:15px;">¡INFO DEL MICHI!</h2>
+        <h2 style="color:#2c3e50; margin-bottom:15px;">¡REPORTE DEL MICHI!</h2>
         <p id="modal-text" style="color:#2c3e50; font-family: sans-serif; font-weight: bold; margin-bottom: 20px;"></p>
         <button class="btn-brawl" style="font-size:1rem; padding:10px;" onclick="closeInfo()">ENTENDIDO</button>
     </div>
@@ -179,6 +188,7 @@
     <h1>CALCULADORA MANCHO</h1>
     <span class="dev-tag">ROMÁN SERRANO DURÁN (mancho)</span>
 
+    <!-- PANTALLA DE INICIO -->
     <div id="home">
         <button class="btn-brawl" onclick="showSub()">LINEAL 🚀</button>
         <button class="btn-brawl" onclick="setup('cuad')">CUADRÁTICA 🐱</button>
@@ -186,12 +196,14 @@
         <button class="btn-brawl" onclick="setup('sis3')">SISTEMA 3X3 🦁</button>
     </div>
 
+    <!-- SUBMENÚ LINEAL -->
     <div id="sub-menu" style="display:none;">
         <button class="btn-brawl" onclick="setup('lin-p')">PUNTO-PENDIENTE</button>
         <button class="btn-brawl" onclick="setup('lin-g')">FORMA GENERAL</button>
-        <button class="btn-brawl" style="background:#7f8c8d" onclick="goHome()">ATRÁS</button>
+        <button class="btn-brawl" style="background:var(--brawl-gray)" onclick="goHome()">VOLVER</button>
     </div>
 
+    <!-- PANTALLA DE CÁLCULO -->
     <div id="calc-screen" style="display:none;">
         <div class="michi-section">
             <div id="michi-emoji" class="emoji-click" onclick="toggleInfo()">🐱</div>
@@ -208,7 +220,10 @@
             <canvas id="myChart"></canvas>
         </div>
 
-        <button class="btn-brawl" style="background:#e74c3c; margin-top:15px;" onclick="goHome()">INICIO</button>
+        <div class="nav-buttons">
+            <button class="btn-brawl" style="background:var(--brawl-gray); flex:1;" onclick="goBack()">VOLVER</button>
+            <button class="btn-brawl" style="background:var(--brawl-red); flex:1;" onclick="goHome()">INICIO</button>
+        </div>
     </div>
 </div>
 
@@ -216,11 +231,11 @@
     let currentMode = '';
     let chartInstance = null;
     const descriptions = {
-        'lin-p': "Calcula la recta con punto y pendiente: y - y1 = m(x - x1).",
-        'lin-g': "Ecuación general: Ax + By + C = 0.",
-        'cuad': "Ecuación de 2do grado: ax² + bx + c = 0.",
-        'sis2': "Sistema 2x2: Encuentra donde se cruzan dos líneas.",
-        'sis3': "Sistema 3x3: Resuelto por Método de Cramer (Determinantes)."
+        'lin-p': "Usa y - y1 = m(x - x1). Ideal para cuando tienes la pendiente y un punto.",
+        'lin-g': "Ecuación general Ax + By + C = 0. Representa cualquier recta.",
+        'cuad': "Ecuación ax² + b x + c = 0. Encuentra los cortes con el eje X.",
+        'sis2': "Sistema de 2 ecuaciones. El resultado es el punto donde se cruzan.",
+        'sis3': "Sistema 3x3. Resuelto mediante determinantes (Cramer)."
     };
 
     function showSub() {
@@ -232,7 +247,16 @@
         document.getElementById('home').style.display = 'block';
         document.getElementById('sub-menu').style.display = 'none';
         document.getElementById('calc-screen').style.display = 'none';
-        if(chartInstance) { chartInstance.destroy(); chartInstance = null; }
+        clearChart();
+    }
+
+    function goBack() {
+        if (currentMode === 'lin-p' || currentMode === 'lin-g') {
+            document.getElementById('calc-screen').style.display = 'none';
+            document.getElementById('sub-menu').style.display = 'block';
+        } else {
+            goHome();
+        }
     }
 
     function toggleInfo() {
@@ -255,7 +279,14 @@
         document.getElementById('result-display').style.display = 'none';
         document.getElementById('graph-wrapper').style.display = 'none';
         document.getElementById('btn-retry').style.display = 'none';
-        if(chartInstance) { chartInstance.destroy(); chartInstance = null; }
+        clearChart();
+    }
+
+    function clearChart() {
+        if(chartInstance) {
+            chartInstance.destroy();
+            chartInstance = null;
+        }
     }
 
     function setup(mode) {
@@ -295,7 +326,7 @@
         if(currentMode === 'lin-p') {
             const m = val('n1'), x1 = val('n2'), y1 = val('n3');
             const b = y1 - (m * x1);
-            resDiv.innerHTML = `Ecuación: y = ${m}x + (${b.toFixed(2)})`;
+            resDiv.innerHTML = `y = ${m}x + (${b.toFixed(2)})`;
             dataPoints = labels.map(x => m*x + b);
             showGraph = true;
         } else if(currentMode === 'lin-g') {
@@ -311,7 +342,7 @@
             const a = val('n1'), b = val('n2'), c = val('n3');
             const disc = b*b - 4*a*c;
             if(a === 0) resDiv.innerHTML = "No es cuadrática";
-            else if(disc < 0) resDiv.innerHTML = "Raíces Imaginarias";
+            else if(disc < 0) resDiv.innerHTML = "Sin raíces reales";
             else resDiv.innerHTML = `x1: ${((-b+Math.sqrt(disc))/(2*a)).toFixed(2)} | x2: ${((-b-Math.sqrt(disc))/(2*a)).toFixed(2)}`;
             dataPoints = labels.map(x => a*x*x + b*x + c);
             showGraph = true;
@@ -325,7 +356,7 @@
             const a2=val('n5'), b2=val('n6'), c2=val('n7'), d2=val('n8');
             const a3=val('n9'), b3=val('n10'), c3=val('n11'), d3=val('n12');
             const det = a1*(b2*c3-b3*c2) - b1*(a2*c3-a3*c2) + c1*(a2*b3-a3*b2);
-            if(det === 0) resDiv.innerHTML = "Det = 0";
+            if(det === 0) resDiv.innerHTML = "No hay solución";
             else {
                 const dx = d1*(b2*c3-b3*c2)-b1*(d2*c3-d3*c2)+c1*(d2*b3-d3*b2);
                 const dy = a1*(d2*c3-d3*c2)-d1*(a2*c3-a3*c2)+c1*(a2*d3-a3*d2);
@@ -336,7 +367,7 @@
 
         if(showGraph) {
             graphDiv.style.display = 'block';
-            if(chartInstance) chartInstance.destroy();
+            clearChart();
             const ctx = document.getElementById('myChart').getContext('2d');
             chartInstance = new Chart(ctx, {
                 type: 'line',

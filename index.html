@@ -74,10 +74,9 @@
 
         .btn-brawl:active { transform: translateY(3px); box-shadow: 0 2px 0px rgba(0,0,0,0.2); }
 
-        /* Estilos del Michi */
         .michi-section {
             position: relative;
-            display: flex;
+            display: flex; /* Asegura que se vea */
             justify-content: center;
             align-items: center;
             margin-bottom: 20px;
@@ -111,7 +110,6 @@
             50% { transform: translateY(-5px); }
         }
 
-        /* Modal */
         #info-modal {
             display: none;
             position: fixed;
@@ -286,6 +284,7 @@
         document.getElementById('result-display').style.display = 'none';
         document.getElementById('graph-wrapper').style.display = 'none';
         document.getElementById('btn-retry').style.display = 'none';
+        document.getElementById('click-bubble').style.display = 'block';
         if(chartInstance) chartInstance.destroy();
     }
 

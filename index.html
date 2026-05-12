@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Mancho - Mobile Ready</title>
+    <title>Calculadora de Mancho - Pro Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
     <style>
@@ -14,7 +14,6 @@
             --btn-red: #E74C3C;
         }
 
-        /* Reset básico para evitar movimientos raros */
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
@@ -22,9 +21,21 @@
             background-color: var(--bg);
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
             padding: 15px;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Estilo para la firma fija en la esquina */
+        .fixed-signature {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 80px; /* Tamaño discreto para móvil */
+            z-index: 1000;
+            mix-blend-mode: multiply; /* Elimina el fondo blanco de la foto */
+            border-radius: 5px;
+            pointer-events: none; /* Para que no estorbe al hacer clic */
         }
 
         .brawl-card {
@@ -33,10 +44,10 @@
             border-radius: 25px;
             padding: 20px;
             width: 100%;
-            max-width: 500px; /* Tamaño ideal para lectura */
+            max-width: 500px;
             box-shadow: 8px 8px 0px rgba(0,0,0,0.4);
             text-align: center;
-            margin-top: 10px;
+            margin-top: 40px; /* Espacio para que no choque con la firma */
         }
 
         h1 {
@@ -44,7 +55,15 @@
             color: var(--primary);
             text-shadow: 3px 3px 0px #000;
             font-size: 1.8rem;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
+        }
+
+        .dev-credit {
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+            margin-bottom: 20px;
+            opacity: 0.9;
         }
 
         .btn-brawl {
@@ -60,12 +79,10 @@
             cursor: pointer;
             text-shadow: 2px 2px 0px #000;
             box-shadow: 0 4px 0px rgba(0,0,0,0.3);
-            display: block;
         }
 
         .michi-dialog {
             display: flex;
-            flex-direction: row; /* Por defecto horizontal */
             align-items: center;
             background: rgba(0,0,0,0.2);
             padding: 12px;
@@ -74,33 +91,19 @@
             border: 3px solid #1c2833;
         }
 
-        .michi-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 80px;
-        }
+        .michi-container { display: flex; flex-direction: column; align-items: center; min-width: 85px; }
 
         .michi-icon { 
             font-size: 40px; 
             background: white; 
             border-radius: 50%; 
             border: 3px solid #000;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 60px; height: 60px;
+            display: flex; align-items: center; justify-content: center;
             cursor: pointer; 
         }
 
-        .michi-hint {
-            font-size: 0.6rem;
-            color: white;
-            font-weight: bold;
-            margin-top: 4px;
-            line-height: 1;
-        }
+        .michi-hint { font-size: 0.6rem; color: white; font-weight: bold; margin-top: 5px; line-height: 1.1; }
 
         .bubble {
             background: white;
@@ -112,51 +115,26 @@
             font-size: 0.85rem;
             color: #333;
             flex: 1;
-            position: relative;
         }
 
-        /* Estilo de inputs responsivos */
         .input-group {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            align-items: center;
-            gap: 8px;
-            margin: 15px 0;
+            gap: 5px;
+            margin: 10px 0;
             color: white;
-            font-weight: bold;
+            font-size: 0.9rem;
         }
 
         input {
             font-family: 'Luckiest Guy', cursive;
-            border: 3px solid #000;
+            border: 2px solid #000;
             border-radius: 8px;
-            padding: 8px;
-            width: 70px;
+            padding: 5px;
+            width: 55px;
             text-align: center;
-            font-size: 1rem;
         }
-
-        .nav-container {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .btn-nav {
-            font-family: 'Luckiest Guy', cursive;
-            flex: 1;
-            padding: 10px;
-            font-size: 1rem;
-            color: white;
-            border: 3px solid #000;
-            border-radius: 12px;
-            cursor: pointer;
-            text-shadow: 1px 1px 0px #000;
-        }
-
-        .btn-blue { background: var(--btn-blue); box-shadow: 0 4px 0px #2471A3; }
-        .btn-red { background: var(--btn-red); box-shadow: 0 4px 0px #943126; }
 
         .res-box {
             background: white;
@@ -164,52 +142,63 @@
             border-radius: 12px;
             padding: 15px;
             margin: 10px 0;
-            color: #333;
             font-weight: bold;
-            font-size: 1rem;
+            white-space: pre-line;
+            color: #333;
         }
 
-        canvas {
-            background: white;
-            border-radius: 15px;
+        .nav-container { display: flex; gap: 10px; margin-top: 15px; }
+
+        .btn-nav {
+            font-family: 'Luckiest Guy', cursive;
+            flex: 1;
+            padding: 10px;
+            color: white;
             border: 3px solid #000;
-            width: 100% !important;
-            height: auto !important;
+            border-radius: 12px;
+            cursor: pointer;
         }
 
-        /* Ajustes para pantallas muy pequeñas */
-        @media (max-width: 400px) {
-            h1 { font-size: 1.5rem; }
-            .michi-dialog { flex-direction: column; text-align: center; }
-            .bubble { margin-left: 0; margin-top: 10px; }
-            input { width: 60px; }
+        .btn-blue { background: var(--btn-blue); box-shadow: 0 4px 0px #2471A3; }
+        .btn-red { background: var(--btn-red); box-shadow: 0 4px 0px #943126; }
+
+        .chart-container {
+            width: 100%;
+            height: 200px; /* Altura controlada para móviles */
+            margin-top: 10px;
+            position: relative;
         }
 
-        /* Modal adaptable */
-        .modal-content {
-            background: white;
-            margin: 20% auto;
-            padding: 20px;
-            border: 5px solid #000;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 350px;
+        canvas { 
+            background: white; 
+            border-radius: 15px; 
+            border: 3px solid #000; 
+        }
+
+        @media (max-width: 450px) {
+            .fixed-signature { width: 60px; }
+            .input-group { font-size: 0.8rem; }
+            input { width: 45px; }
+            h1 { font-size: 1.4rem; }
         }
     </style>
 </head>
 <body>
 
-<!-- Estructura del Modal -->
+<!-- Firma fija del autor -->
+<img src="https://r2.erweima.ai/i/6fS6FofqTj606q6S-L4u3w.png" alt="Firma Román" class="fixed-signature">
+
 <div id="michiModal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8);" onclick="this.style.display='none'">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <div id="modal-title" style="font-family:'Luckiest Guy'; font-size:1.5rem; color:#333;"></div>
-        <p id="modal-text" style="margin:15px 0; font-weight:bold; color:#666;"></p>
-        <button class="btn-brawl" style="font-size:0.9rem;" onclick="document.getElementById('michiModal').style.display='none'">¡OK!</button>
+    <div style="background:white; margin:20% auto; padding:20px; border:5px solid #000; border-radius:20px; width:85%; max-width:350px; text-align:center;" onclick="event.stopPropagation()">
+        <div id="modal-title" style="font-family:'Luckiest Guy'; font-size:1.5rem;"></div>
+        <p id="modal-text" style="margin:15px 0; font-weight:bold; color:#555;"></p>
+        <button class="btn-brawl" style="padding:5px;" onclick="document.getElementById('michiModal').style.display='none'">¡ENTENDIDO!</button>
     </div>
 </div>
 
 <div class="brawl-card">
     <h1>CALCULADORA MANCHO</h1>
+    <div class="dev-credit">Desarrollado por Román Serrano Durán (mancho)</div>
 
     <div id="main-menu">
         <button class="btn-brawl" onclick="startMode('lineal')">LINEAL 🐾</button>
@@ -224,13 +213,16 @@
                 <div id="michi-img" class="michi-icon" onclick="showInfo()">🐱</div>
                 <div class="michi-hint">TOCA PARA INFO</div>
             </div>
-            <div class="bubble">¡Miau! Ingresa los valores y ataca.</div>
+            <div class="bubble" id="michi-speech">¡Miau! Ingresa los datos.</div>
         </div>
 
         <div id="input-container"></div>
         <button class="btn-brawl" onclick="process()">¡ATAQUE CALCULADO!</button>
         <div id="result" class="res-box" style="display:none"></div>
-        <canvas id="myChart"></canvas>
+        
+        <div class="chart-container">
+            <canvas id="myChart"></canvas>
+        </div>
 
         <div class="nav-container">
             <button class="btn-nav btn-blue" onclick="resetInputs()">REINTENTAR</button>
@@ -244,10 +236,10 @@
     let myChart = null;
 
     const infoData = {
-        lineal: { t: "LINEAL 🐾", d: "Una línea recta. Ideal para calcular trayectorias simples." },
-        cuadratica: { t: "CUADRÁTICA 🐱", d: "Una curva o parábola. ¡Como el salto de un michi!" },
-        sistema: { t: "SISTEMA 2X2 🐯", d: "Donde dos caminos se cruzan. ¡Busca el choque!" },
-        sistema3x3: { t: "SISTEMA 3X3 🦁", d: "Cálculo avanzado en 3D. ¡Solo para expertos!" }
+        lineal: { t: "LINEAL 🐾", d: "Encuentra el valor de X donde la línea toca el eje horizontal." },
+        cuadratica: { t: "CUADRÁTICA 🐱", d: "Resuelve ecuaciones de segundo grado usando la fórmula general." },
+        sistema: { t: "SISTEMA 2X2 🐯", d: "Encuentra el punto (X, Y) donde se cruzan las dos rectas." },
+        sistema3x3: { t: "SISTEMA 3X3 🦁", d: "Resolución por determinante para tres incógnitas (X, Y, Z)." }
     };
 
     function startMode(mode) {
@@ -272,11 +264,12 @@
                                   '<div class="input-group">L2: <input type="number" id="a2">x + <input type="number" id="b2">y = <input type="number" id="c2"></div>';
         } else if(mode === 'sistema3x3') {
             icon.innerText = '🦁';
-            container.innerHTML = '<div class="input-group">E1: <input type="number" id="a1">x + <input type="number" id="b1">y + <input type="number" id="c1">z = <input type="number" id="d1"></div>' +
-                                  '<div class="input-group">E2: <input type="number" id="a2">x + <input type="number" id="b2">y + <input type="number" id="c2">z = <input type="number" id="d2"></div>' +
-                                  '<div class="input-group">E3: <input type="number" id="a3">x + <input type="number" id="b3">y + <input type="number" id="c3">z = <input type="number" id="d3"></div>';
+            container.innerHTML = 
+                '<div class="input-group">E1: <input type="number" id="a1">x + <input type="number" id="b1">y + <input type="number" id="c1">z = <input type="number" id="d1"></div>' +
+                '<div class="input-group">E2: <input type="number" id="a2">x + <input type="number" id="b2">y + <input type="number" id="c2">z = <input type="number" id="d2"></div>' +
+                '<div class="input-group">E3: <input type="number" id="a3">x + <input type="number" id="b3">y + <input type="number" id="c3">z = <input type="number" id="d3"></div>';
         }
-        document.getElementById('myChart').style.display = (mode === 'sistema3x3') ? 'none' : 'block';
+        document.querySelector('.chart-container').style.display = (mode === 'sistema3x3') ? 'none' : 'block';
     }
 
     function showInfo() {
@@ -303,23 +296,34 @@
             if(currentMode === 'lineal') {
                 const a = parseFloat(document.getElementById('a').value), b = parseFloat(document.getElementById('b').value);
                 resDiv.innerText = `x = ${(-b/a).toFixed(2)}`;
-                ds = [{label: 'F(x)', data: L.map(i => a*i+b), borderColor: 'orange'}];
+                ds = [{label: 'F(x)', data: L.map(i => a*i+b), borderColor: 'orange', borderWidth: 3}];
             } else if(currentMode === 'cuadratica') {
                 const a=parseFloat(document.getElementById('a').value), b=parseFloat(document.getElementById('b').value), c=parseFloat(document.getElementById('c').value);
                 const d = b*b - 4*a*c;
-                resDiv.innerText = d < 0 ? "Sin solución" : `x1=${((-b+Math.sqrt(d))/(2*a)).toFixed(2)} x2=${((-b-Math.sqrt(d))/(2*a)).toFixed(2)}`;
-                ds = [{label: 'Parábola', data: L.map(i => a*i*i + b*i + c), borderColor: 'red'}];
+                resDiv.innerText = d < 0 ? "Sin solución real" : `x1=${((-b+Math.sqrt(d))/(2*a)).toFixed(2)}\nx2=${((-b-Math.sqrt(d))/(2*a)).toFixed(2)}`;
+                ds = [{label: 'Curva', data: L.map(i => a*i*i + b*i + c), borderColor: 'red', borderWidth: 3}];
             } else if(currentMode === 'sistema') {
                 const a1=parseFloat(document.getElementById('a1').value), b1=parseFloat(document.getElementById('b1').value), c1=parseFloat(document.getElementById('c1').value);
                 const a2=parseFloat(document.getElementById('a2').value), b2=parseFloat(document.getElementById('b2').value), c2=parseFloat(document.getElementById('c2').value);
                 const det = a1*b2 - a2*b1;
-                resDiv.innerText = det===0 ? "Sin solución" : `x=${((c1*b2-c2*b1)/det).toFixed(2)} y=${((a1*c2-a2*c1)/det).toFixed(2)}`;
-                ds = [{label:'L1', data: L.map(i=>(c1-a1*i)/b1), borderColor:'cyan'}, {label:'L2', data: L.map(i=>(c2-a2*i)/b2), borderColor:'yellow'}];
+                resDiv.innerText = det===0 ? "Sin solución" : `x = ${((c1*b2-c2*b1)/det).toFixed(2)}\ny = ${((a1*c2-a2*c1)/det).toFixed(2)}`;
+                ds = [{label:'L1', data: L.map(i=>(c1-a1*i)/b1), borderColor:'cyan', borderWidth: 3}, {label:'L2', data: L.map(i=>(c2-a2*i)/b2), borderColor:'yellow', borderWidth: 3}];
             } else if(currentMode === 'sistema3x3') {
-                resDiv.innerText = "Calculado (ver manual)";
+                const g = (id) => parseFloat(document.getElementById(id).value);
+                const a1=g('a1'), b1=g('b1'), c1=g('c1'), d1=g('d1');
+                const a2=g('a2'), b2=g('b2'), c2=g('c2'), d2=g('d2');
+                const a3=g('a3'), b3=g('b3'), c3=g('c3'), d3=g('d3');
+                const det = a1*(b2*c3-b3*c2) - b1*(a2*c3-a3*c2) + c1*(a2*b3-a3*b2);
+                if(Math.abs(det) < 0.0001) resDiv.innerText = "Sin solución única";
+                else {
+                    const x = (d1*(b2*c3-b3*c2) - b1*(d2*c3-d3*c2) + c1*(d2*b3-d3*b2)) / det;
+                    const y = (a1*(d2*c3-d3*c2) - d1*(a2*c3-a3*c2) + c1*(a2*d3-a3*d2)) / det;
+                    const z = (a1*(b2*d3-b3*d2) - b1*(a2*d3-a3*d2) + d1*(a2*b3-a3*b2)) / det;
+                    resDiv.innerText = `x = ${x.toFixed(2)}\ny = ${y.toFixed(2)}\nz = ${z.toFixed(2)}`;
+                }
             }
             if(currentMode !== 'sistema3x3') draw(ds);
-        } catch(e) { resDiv.innerText = "¡Error!"; }
+        } catch(e) { resDiv.innerText = "¡Miau! Revisa los números."; }
     }
 
     function draw(ds) {
@@ -327,7 +331,12 @@
         myChart = new Chart(document.getElementById('myChart'), {
             type: 'line',
             data: { labels: Array.from({length: 21}, (_, i) => i - 10), datasets: ds },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                elements: { point: { radius: 2 } },
+                plugins: { legend: { labels: { color: '#333', font: { weight: 'bold' } } } }
+            }
         });
     }
 </script>

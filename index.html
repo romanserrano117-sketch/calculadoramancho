@@ -90,13 +90,20 @@
             border: 4px solid #1c2833;
         }
 
+        .michi-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 100px;
+        }
+
         .michi-icon { 
             font-size: 50px; 
             background: white; 
             border-radius: 50%; 
             padding: 5px; 
             border: 4px solid #000;
-            min-width: 70px;
+            width: 70px;
             height: 70px;
             display: flex;
             align-items: center;
@@ -107,26 +114,30 @@
 
         .michi-icon:hover { transform: scale(1.1); }
 
+        .michi-hint {
+            font-size: 0.7rem;
+            color: white;
+            font-weight: bold;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
         .bubble {
             background: white;
             border: 4px solid #000;
             border-radius: 20px;
             padding: 15px;
-            margin-left: 20px;
+            margin-left: 15px;
             font-weight: bold;
             color: #333;
             flex: 1;
         }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
             z-index: 100;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
+            left: 0; top: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.8);
         }
 
@@ -139,11 +150,7 @@
             width: 80%;
             max-width: 400px;
             text-align: center;
-            box-shadow: 8px 8px 0px var(--primary);
         }
-
-        .modal-title { font-family: 'Luckiest Guy', cursive; font-size: 1.8rem; margin-bottom: 10px; color: #333; }
-        .modal-text { font-weight: bold; line-height: 1.4; color: #555; margin-bottom: 20px; }
 
         .section { display: none; }
         .input-group { margin: 15px 0; color: white; font-weight: bold; font-size: 1.2rem; }
@@ -156,9 +163,9 @@
 
 <div id="michiModal" class="modal" onclick="closeModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <div id="modal-title" class="modal-title">INFO</div>
-        <p id="modal-text" class="modal-text"></p>
-        <button class="btn-brawl" style="font-size: 1.1rem; padding: 10px;" onclick="closeModal()">¡ENTENDIDO!</button>
+        <div id="modal-title" style="font-family:'Luckiest Guy'; font-size:1.8rem;"></div>
+        <p id="modal-text" style="margin: 20px 0; font-weight:bold; color:#555;"></p>
+        <button class="btn-brawl" style="font-size:1rem; padding:10px;" onclick="closeModal()">¡ENTENDIDO!</button>
     </div>
 </div>
 
@@ -174,8 +181,11 @@
 
     <div id="calc-mode" class="section">
         <div class="michi-dialog">
-            <div id="michi-img" class="michi-icon" onclick="showInfo()">🐱</div>
-            <div class="bubble" id="michi-speech">¡Miau! Toca mi cara para aprender.</div>
+            <div class="michi-container">
+                <div id="michi-img" class="michi-icon" onclick="showInfo()">🐱</div>
+                <div class="michi-hint">Presiona si quieres saber más</div>
+            </div>
+            <div class="bubble" id="michi-speech">¡Miau! ¿Listo para resolver?</div>
         </div>
 
         <div id="input-container"></div>
@@ -195,10 +205,10 @@
     let myChart = null;
 
     const infoData = {
-        lineal: { t: "LINEAL 🐾", d: "Es una línea recta. Representa un cambio constante. ¡Buscamos el punto exacto donde la línea cruza el suelo!" },
+        lineal: { t: "LINEAL 🐾", d: "Es una línea recta que representa un cambio constante. ¡Buscamos el punto exacto donde la línea cruza el eje X!" },
         cuadratica: { t: "CUADRÁTICA 🐱", d: "Forma una curva llamada parábola. ¡Es como el arco que hace un michi al saltar por su comida!" },
-        sistema: { t: "SISTEMA 2X2 🐯", d: "Dos líneas que se cruzan. La solución es el punto de encuentro donde ambos michis se ven cara a cara." },
-        sistema3x3: { t: "SISTEMA 3X3 🦁", d: "¡Nivel Mega Michi! Tres variables (X, Y, Z). Es como resolver un cubo Rubik matemático." }
+        sistema: { t: "SISTEMA 2X2 🐯", d: "Dos líneas que se cruzan. La solución es el punto exacto donde ambos michis se encuentran." },
+        sistema3x3: { t: "SISTEMA 3X3 🦁", d: "¡Nivel Mega Michi! Buscamos la intersección de tres planos en el espacio (X, Y, Z)." }
     };
 
     function showInfo() {
@@ -223,7 +233,7 @@
 
         if(mode === 'lineal') {
             icon.innerText = '🐱';
-            container.innerHTML = '<div class="input-group">y = <input type="number" id="a" placeholder="A"> x + <input type="number" id="b" placeholder="B"></div>';
+            container.innerHTML = '<div class="input-group">y = <input type="number" id="a"> x + <input type="number" id="b"></div>';
         } else if(mode === 'cuadratica') {
             icon.innerText = '🐈';
             container.innerHTML = '<div class="input-group"><input type="number" id="a">x² + <input type="number" id="b">x + <input type="number" id="c"> = 0</div>';
@@ -250,17 +260,20 @@
         const resDiv = document.getElementById('result');
         resDiv.style.display = 'block';
         const labels = Array.from({length: 21}, (_, i) => i - 10);
+        let datasets = [];
 
         try {
             if(currentMode === 'lineal') {
                 const a = parseFloat(document.getElementById('a').value), b = parseFloat(document.getElementById('b').value);
+                if(isNaN(a) || isNaN(b)) throw "error";
                 resDiv.innerText = `x = ${(-b/a).toFixed(2)}`;
-                draw([{label: 'Ruta', data: labels.map(i => a*i+b), borderColor: 'orange'}]);
+                datasets = [{label: 'Función', data: labels.map(i => a*i+b), borderColor: 'orange'}];
             } else if(currentMode === 'cuadratica') {
                 const a=parseFloat(document.getElementById('a').value), b=parseFloat(document.getElementById('b').value), c=parseFloat(document.getElementById('c').value);
+                if(isNaN(a) || isNaN(b) || isNaN(c)) throw "error";
                 const d = b*b - 4*a*c;
                 resDiv.innerText = d < 0 ? "Sin solución real" : `x1=${((-b+Math.sqrt(d))/(2*a)).toFixed(2)}\nx2=${((-b-Math.sqrt(d))/(2*a)).toFixed(2)}`;
-                draw([{label: 'Salto', data: labels.map(i => a*i*i + b*i + c), borderColor: 'red'}]);
+                datasets = [{label: 'Parábola', data: labels.map(i => a*i*i + b*i + c), borderColor: 'red'}];
             } else if(currentMode === 'sistema') {
                 const a1=parseFloat(document.getElementById('a1').value), b1=parseFloat(document.getElementById('b1').value), c1=parseFloat(document.getElementById('c1').value);
                 const a2=parseFloat(document.getElementById('a2').value), b2=parseFloat(document.getElementById('b2').value), c2=parseFloat(document.getElementById('c2').value);
@@ -268,7 +281,7 @@
                 if(det === 0) resDiv.innerText = "Sin solución única";
                 else {
                     resDiv.innerText = `x = ${((c1*b2 - c2*b1)/det).toFixed(2)}\ny = ${((a1*c2 - a2*c1)/det).toFixed(2)}`;
-                    draw([{label: 'M1', data: labels.map(i => (c1-a1*i)/b1), borderColor: 'cyan'}, {label: 'M2', data: labels.map(i => (c2-a2*i)/b2), borderColor: 'yellow'}]);
+                    datasets = [{label: 'L1', data: labels.map(i => (c1-a1*i)/b1), borderColor: 'cyan'}, {label: 'L2', data: labels.map(i => (c2-a2*i)/b2), borderColor: 'yellow'}];
                 }
             } else if(currentMode === 'sistema3x3') {
                 const getV = (id) => parseFloat(document.getElementById(id).value);
@@ -284,15 +297,16 @@
                     resDiv.innerText = `x = ${x.toFixed(2)}\ny = ${y.toFixed(2)}\nz = ${z.toFixed(2)}`;
                 }
             }
-        } catch(e) { resDiv.innerText = "Error en los datos"; }
+            if(currentMode !== 'sistema3x3') draw(datasets);
+        } catch(e) { resDiv.innerText = "¡Miau! Datos incompletos."; }
     }
 
-    function draw(datasets) {
+    function draw(ds) {
         if(myChart) myChart.destroy();
         myChart = new Chart(document.getElementById('myChart'), {
             type: 'line',
-            data: { labels: Array.from({length: 21}, (_, i) => i - 10), datasets: datasets },
-            options: { responsive: true, scales: { y: { grid: { color: 'rgba(0,0,0,0.1)' } } } }
+            data: { labels: Array.from({length: 21}, (_, i) => i - 10), datasets: ds },
+            options: { responsive: true }
         });
     }
 </script>

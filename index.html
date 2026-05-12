@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Calculadora de Mancho - Brawl Edition</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Calculadora Mancho</title>
     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -34,12 +33,14 @@
             max-width: 420px;
             box-shadow: 10px 10px 0px rgba(0,0,0,0.4);
             text-align: center;
+            position: relative;
         }
 
         h1 {
             color: var(--brawl-yellow);
             text-shadow: 4px 4px 0px #000;
             font-size: 1.8rem;
+            margin-bottom: 2px;
         }
 
         .dev-tag {
@@ -63,6 +64,10 @@
             text-shadow: 3px 3px 0px #000;
             cursor: pointer;
             box-shadow: 0 5px 0px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
 
         .btn-brawl:active { transform: translateY(3px); box-shadow: 0 2px 0px rgba(0,0,0,0.2); }
@@ -70,21 +75,21 @@
         .michi-box {
             display: flex;
             align-items: center;
-            background: rgba(0,0,0,0.4);
-            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
             border-radius: 20px;
             margin-bottom: 15px;
             border: 3px solid #000;
         }
 
-        .emoji-btn {
-            font-size: 35px;
+        .emoji-click {
+            font-size: 40px;
             cursor: pointer;
             transition: transform 0.2s;
             user-select: none;
         }
 
-        .emoji-btn:hover { transform: scale(1.2) rotate(10deg); }
+        .emoji-click:hover { transform: scale(1.1); }
 
         .bubble {
             background: white;
@@ -92,30 +97,32 @@
             border-radius: 12px;
             padding: 8px;
             margin-left: 10px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #000;
             flex: 1;
         }
 
-        .input-grid { margin: 15px 0; color: white; }
+        .input-grid { margin: 15px 0; color: white; line-height: 2;}
+        
         input {
             font-family: 'Luckiest Guy';
             border: 3px solid #000;
             border-radius: 8px;
             padding: 5px;
-            width: 60px;
+            width: 65px;
             text-align: center;
-            margin: 3px;
+            margin: 2px;
         }
 
         .res-box {
             background: #fff;
             border: 3px solid #000;
             border-radius: 12px;
-            padding: 10px;
-            margin: 10px 0;
+            padding: 15px;
+            margin: 15px 0;
             color: #000;
-            font-size: 0.9rem;
+            font-size: 1.1rem;
+            min-height: 50px;
         }
     </style>
 </head>
@@ -125,108 +132,118 @@
     <h1>CALCULADORA MANCHO</h1>
     <span class="dev-tag">ROMÁN SERRANO DURÁN (mancho)</span>
 
-    <div id="menu-home">
-        <button class="btn-brawl" onclick="showSub()">LINEAL 🐾</button>
+    <div id="home">
+        <button class="btn-brawl" onclick="showSub()">LINEAL 🚀</button>
         <button class="btn-brawl" onclick="setup('cuad')">CUADRÁTICA 🐱</button>
         <button class="btn-brawl" onclick="setup('sis2')">SISTEMA 2X2 🐯</button>
         <button class="btn-brawl" onclick="setup('sis3')">SISTEMA 3X3 🦁</button>
     </div>
 
-    <div id="menu-sub" style="display:none;">
+    <div id="sub-menu" style="display:none;">
         <button class="btn-brawl" onclick="setup('lin-p')">PUNTO-PENDIENTE</button>
         <button class="btn-brawl" onclick="setup('lin-g')">FORMA GENERAL</button>
         <button class="btn-brawl" style="background:#7f8c8d" onclick="goHome()">ATRÁS</button>
     </div>
 
-    <div id="calc-area" style="display:none;">
+    <div id="calc-screen" style="display:none;">
         <div class="michi-box">
-            <!-- EMOJI CON DESCRIPCIÓN -->
-            <div class="emoji-btn" onclick="showInfo()">🐱</div>
-            <div id="hint" class="bubble">Toca al michi para saber más</div>
+            <!-- AQUÍ LE DAS CLIC PARA LA INFO -->
+            <div class="emoji-click" onclick="popInfo()">🐱</div>
+            <div id="hint-text" class="bubble">Toca al gato para ver la ayuda</div>
         </div>
-        <div id="inputs" class="input-grid"></div>
-        <button class="btn-brawl" onclick="solve()">RESOLVER</button>
-        <div id="res" class="res-box" style="display:none;"></div>
+        
+        <div id="inputs-container" class="input-grid"></div>
+        
+        <button class="btn-brawl" onclick="calculate()">RESOLVER</button>
+        
+        <div id="result-display" class="res-box" style="display:none;"></div>
+        
         <button class="btn-brawl" style="background:#e74c3c" onclick="goHome()">INICIO</button>
     </div>
 </div>
 
 <script>
-    let mode = '';
-    const info = {
-        'lin-p': "Punto-Pendiente: Úsala cuando conoces un punto (x1, y1) y la inclinación (m) de la recta.",
-        'lin-g': "Forma General: Ax + By + C = 0. Es la forma estándar para representar cualquier recta.",
-        'cuad': "Ecuación Cuadrática: Resuelve parábolas usando la 'chicharronera'.",
-        'sis2': "Sistema 2x2: Encuentra donde se cruzan dos líneas en el plano.",
-        'sis3': "Sistema 3x3: Usa la Regla de Cramer para hallar X, Y y Z en tres dimensiones."
+    let currentMode = '';
+    const descriptions = {
+        'lin-p': "Fórmula: y - y1 = m(x - x1). Ideal cuando tienes la pendiente y un punto de paso.",
+        'lin-g': "Fórmula: Ax + By + C = 0. La forma estándar para representar líneas rectas.",
+        'cuad': "Fórmula: ax² + bx + c = 0. Usamos la fórmula general para encontrar x1 y x2.",
+        'sis2': "Dos ecuaciones con dos incógnitas. Encuentra el punto donde se cruzan las líneas.",
+        'sis3': "Tres ecuaciones con tres incógnitas. Resuelto por el método de Cramer (Determinantes)."
     };
 
     function showSub() {
-        document.getElementById('menu-home').style.display = 'none';
-        document.getElementById('menu-sub').style.display = 'block';
+        document.getElementById('home').style.display = 'none';
+        document.getElementById('sub-menu').style.display = 'block';
     }
 
     function goHome() {
-        document.getElementById('menu-home').style.display = 'block';
-        document.getElementById('menu-sub').style.display = 'none';
-        document.getElementById('calc-area').style.display = 'none';
+        document.getElementById('home').style.display = 'block';
+        document.getElementById('sub-menu').style.display = 'none';
+        document.getElementById('calc-screen').style.display = 'none';
     }
 
-    function showInfo() {
-        alert(info[mode] || "¡Elige una operación para calcular!");
+    function popInfo() {
+        alert(descriptions[currentMode]);
     }
 
-    function setup(m) {
-        mode = m;
-        document.getElementById('menu-home').style.display = 'none';
-        document.getElementById('menu-sub').style.display = 'none';
-        document.getElementById('calc-area').style.display = 'block';
-        document.getElementById('res').style.display = 'none';
+    function setup(mode) {
+        currentMode = mode;
+        document.getElementById('home').style.display = 'none';
+        document.getElementById('sub-menu').style.display = 'none';
+        document.getElementById('calc-screen').style.display = 'block';
+        document.getElementById('result-display').style.display = 'none';
         
-        const area = document.getElementById('inputs');
-        const hint = document.getElementById('hint');
-        
-        if(m === 'lin-p') {
+        const container = document.getElementById('inputs-container');
+        const hint = document.getElementById('hint-text');
+
+        if(mode === 'lin-p') {
             hint.innerText = "y - y1 = m(x - x1)";
-            area.innerHTML = 'm:<input id="i1"> x1:<input id="i2"> y1:<input id="i3">';
-        } else if(m === 'lin-g') {
+            container.innerHTML = 'm: <input id="n1"> x1: <input id="n2"> y1: <input id="n3">';
+        } else if(mode === 'lin-g') {
             hint.innerText = "Ax + By + C = 0";
-            area.innerHTML = 'A:<input id="i1"> B:<input id="i2"> C:<input id="i3">';
-        } else if(m === 'cuad') {
+            container.innerHTML = 'A: <input id="n1"> B: <input id="n2"> C: <input id="n3">';
+        } else if(mode === 'cuad') {
             hint.innerText = "ax² + bx + c = 0";
-            area.innerHTML = 'a:<input id="i1"> b:<input id="i2"> c:<input id="i3">';
-        } else if(m === 'sis2') {
-            hint.innerText = "Sistema 2x2";
-            area.innerHTML = 'L1: <input id="i1">x+<input id="i2">y=<input id="i3"><br>L2: <input id="i4">x+<input id="i5">y=<input id="i6">';
-        } else if(m === 'sis3') {
-            hint.innerText = "Sistema 3x3 (Cramer)";
-            area.innerHTML = 'E1: <input id="i1">x+<input id="i2">y+<input id="i3">z=<input id="i4"><br>E2: <input id="i5">x+<input id="i6">y+<input id="i7">z=<input id="i8"><br>E3: <input id="i9">x+<input id="i10">y+<input id="i11">z=<input id="i12">';
+            container.innerHTML = 'a: <input id="n1"> b: <input id="n2"> c: <input id="n3">';
+        } else if(mode === 'sis2') {
+            hint.innerText = "Sistema de Ecuaciones 2x2";
+            container.innerHTML = 'L1: <input id="n1">x + <input id="n2">y = <input id="n3"><br>L2: <input id="n4">x + <input id="n5">y = <input id="n6">';
+        } else if(mode === 'sis3') {
+            hint.innerText = "Sistema 3x3 (Método Cramer)";
+            container.innerHTML = 'E1: <input id="n1">x+<input id="n2">y+<input id="n3">z=<input id="n4"><br>E2: <input id="n5">x+<input id="n6">y+<input id="n7">z=<input id="n8"><br>E3: <input id="n9">x+<input id="n10">y+<input id="n11">z=<input id="n12">';
         }
     }
 
-    function solve() {
-        const res = document.getElementById('res');
-        res.style.display = 'block';
-        const get = (id) => parseFloat(document.getElementById(id).value);
+    function calculate() {
+        const resDiv = document.getElementById('result-display');
+        resDiv.style.display = 'block';
+        const val = (id) => parseFloat(document.getElementById(id).value);
 
         try {
-            if(mode === 'sis3') {
-                const a1=get('i1'), b1=get('i2'), c1=get('i3'), d1=get('i4');
-                const a2=get('i5'), b2=get('i6'), c2=get('i7'), d2=get('i8');
-                const a3=get('i9'), b3=get('i10'), c3=get('i11'), d3=get('i12');
-                const det = a1*(b2*c3-b3*c2) - b1*(a2*c3-a3*c2) + c1*(a2*b3-a3*b2);
-                if(det===0) res.innerText = "Sin solución única";
-                else {
-                    const dx = d1*(b2*c3-b3*c2) - b1*(d2*c3-d3*c2) + c1*(d2*b3-d3*b2);
-                    const dy = a1*(d2*c3-d3*c2) - d1*(a2*c3-a3*c2) + c1*(a2*d3-a3*d2);
-                    const dz = a1*(b2*d3-b3*d2) - b1*(a2*d3-a3*d2) + d1*(a2*b3-a3*b2);
-                    res.innerHTML = `X: ${(dx/det).toFixed(2)}<br>Y: ${(dy/det).toFixed(2)}<br>Z: ${(dz/det).toFixed(2)}`;
+            if(currentMode === 'sis3') {
+                const a1=val('n1'), b1=val('n2'), c1=val('n3'), d1=val('n4');
+                const a2=val('n5'), b2=val('n6'), c2=val('n7'), d2=val('n8');
+                const a3=val('n9'), b3=val('n10'), c3=val('n11'), d3=val('n12');
+
+                const det = a1*(b2*c3 - b3*c2) - b1*(a2*c3 - a3*c2) + c1*(a2*b3 - a3*b2);
+                
+                if(det === 0) {
+                    resDiv.innerText = "El sistema no tiene solución única.";
+                } else {
+                    const dx = d1*(b2*c3 - b3*c2) - b1*(d2*c3 - d3*c2) + c1*(d2*b3 - d3*b2);
+                    const dy = a1*(d2*c3 - d3*c2) - d1*(a2*c3 - a3*c2) + c1*(a2*d3 - a3*d2);
+                    const dz = a1*(b2*d3 - b3*d2) - b1*(a2*d3 - a3*d2) + d1*(a2*b3 - a3*b2);
+                    resDiv.innerHTML = `X = ${(dx/det).toFixed(2)}<br>Y = ${(dy/det).toFixed(2)}<br>Z = ${(dz/det).toFixed(2)}`;
                 }
             } else {
-                res.innerText = "¡Cálculo completado!";
+                resDiv.innerText = "Resultado listo (Lógica pendiente)";
             }
-        } catch(e) { res.innerText = "Revisa los campos"; }
+        } catch(e) {
+            resDiv.innerText = "Error: Llena todos los campos.";
+        }
     }
 </script>
+
 </body>
 </html>
